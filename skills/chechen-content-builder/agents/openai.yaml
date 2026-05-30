@@ -1,4 +1,0 @@
-interface:
-  display_name: "Контент Chechen"
-  short_description: "Создает и проверяет учебный контент"
-  default_prompt: "Используй $chechen-content-builder, чтобы подготовить или проверить карточки и квизы A0-A1 по чеченскому языку."

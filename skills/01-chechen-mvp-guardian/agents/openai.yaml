@@ -1,0 +1,4 @@
+interface:
+  display_name: "01 Контроль MVP Chechen"
+  short_description: "Проверяет идеи и задачи по рамкам MVP"
+  default_prompt: "Используй $01-chechen-mvp-guardian, чтобы проверить идею по спецификациям MVP приложения для изучения чеченского языка."

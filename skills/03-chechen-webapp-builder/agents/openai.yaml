@@ -1,0 +1,4 @@
+interface:
+  display_name: "03 Веб-MVP Chechen"
+  short_description: "Реализует веб-MVP по спецификациям"
+  default_prompt: "Используй $03-chechen-webapp-builder, чтобы реализовать следующую задачу веб-MVP приложения для изучения чеченского языка."
