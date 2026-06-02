@@ -1,0 +1,4 @@
+interface:
+  display_name: "05 Фидбек MVP Chechen"
+  short_description: "Анализирует отзывы после показа MVP"
+  default_prompt: "Используй $05-chechen-mvp-feedback-analyst, чтобы разобрать обратную связь после первого показа MVP приложения для изучения чеченского языка."
