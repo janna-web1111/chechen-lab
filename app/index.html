@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chechen Lab MVP</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" type="button" data-action="home" aria-label="На стартовый экран">
+          <span class="brand-mark">CL</span>
+          <span>
+            <span class="brand-title">Chechen Lab</span>
+            <span class="brand-subtitle">A0 -> A1</span>
+          </span>
+        </button>
+        <nav class="topnav" aria-label="Основная навигация">
+          <button type="button" data-action="path">Путь</button>
+          <button type="button" data-action="review">Повторение</button>
+          <button type="button" data-action="reset">Сброс</button>
+        </nav>
+      </header>
+
+      <main id="app" class="screen" tabindex="-1"></main>
+    </div>
+
+    <script src="./content.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
