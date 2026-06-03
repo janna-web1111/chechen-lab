@@ -113,6 +113,52 @@ Then manually check:
 
 `start -> topics -> first topic -> cards -> quiz -> result -> saved progress -> review`
 
+## Git Workflow For Plans
+
+Every concrete development plan must have its own Git branch.
+
+Before starting a new plan:
+
+1. Return to `main`.
+2. Update `main` from GitHub.
+3. Create a new branch for the plan.
+4. Use a short branch name that describes the plan, for example `plan/content-review` or `feature/cards-flow`.
+
+Do not start a new plan from an old feature branch.
+
+While working on a plan:
+
+- keep changes scoped to that plan;
+- do not mix unrelated specs, app code, and cleanup unless the plan requires it;
+- check `git status` before changing branches;
+- do not overwrite user changes.
+
+When the user asks to finish the plan:
+
+1. Run the relevant checks.
+2. Commit the completed work.
+3. Push the branch to GitHub.
+4. Create a pull request into `main`.
+5. Share the PR link with the user.
+
+After creating the pull request:
+
+- do not merge the PR unless the user explicitly asks;
+- the user will normally merge the PR on GitHub;
+- before continuing with any new plan, return to `main`;
+- update `main` from GitHub after the PR has been merged;
+- only then create the next plan branch.
+
+If the user asks to continue work after a PR, first verify:
+
+```bash
+git checkout main
+git pull origin main
+git status
+```
+
+Then create a new branch for the next plan.
+
 ## Git Hygiene
 
 Keep specs, app code, and AI configuration changes understandable in commits.
