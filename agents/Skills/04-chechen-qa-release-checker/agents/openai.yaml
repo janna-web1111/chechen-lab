@@ -1,0 +1,4 @@
+interface:
+  display_name: "04 QA релиза Chechen"
+  short_description: "Проверяет готовность веб-MVP к показу"
+  default_prompt: "Используй $04-chechen-qa-release-checker, чтобы проверить готовность веб-MVP приложения для изучения чеченского языка к первому показу пользователям."

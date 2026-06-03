@@ -16,6 +16,8 @@ description: "03. Разработка и изменение веб-MVP прил
 1. `01-chechen-mvp-guardian` - сначала проверить рамки MVP.
 2. `02-chechen-content-builder` - затем подготовить или проверить контент.
 3. `03-chechen-webapp-builder` - потом реализовать веб-MVP в коде.
+4. `04-chechen-qa-release-checker` - проверить качество и готовность релиза.
+5. `05-chechen-mvp-feedback-analyst` - разобрать обратную связь после проверки на людях.
 
 ## Что читать сначала
 
