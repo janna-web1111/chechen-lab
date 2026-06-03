@@ -65,6 +65,7 @@ Use them in this order:
 3. `agents/Skills/03-chechen-webapp-builder/`
 4. `agents/Skills/04-chechen-qa-release-checker/`
 5. `agents/Skills/05-chechen-mvp-feedback-analyst/`
+6. `agents/Skills/06-specification-driven-development/`
 
 ## App Structure
 

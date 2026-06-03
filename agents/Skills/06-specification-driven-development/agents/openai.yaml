@@ -1,0 +1,4 @@
+interface:
+  display_name: "06 SDD Chechen Lab"
+  short_description: "Ведет проект через спецификации, планы и AI-конфигурацию"
+  default_prompt: "Используй $06-specification-driven-development, чтобы проверить или обновить specs, roadmap, AGENTS.md и структуру проекта Chechen Lab перед разработкой."
