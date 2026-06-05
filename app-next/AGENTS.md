@@ -12,4 +12,5 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Store learning content separately from UI code in `src/data/`.
 - Store progress only in `localStorage` for MVP.
 - Treat Chechen words, reading hints, and pronunciation as unverified unless `verificationStatus` is `reviewed` or `published`.
-- Main specs live in `../Spek/`; functional specs live in `../Spek/Функции/`.
+- Main specs live in `../спецификации/`; document order is described in `../спецификации/README.md`.
+- Functional specs are split across `../спецификации/02-FunctionalMap/`, `../спецификации/03-FeatureSpecs/`, and `../спецификации/06-UserStories/`.

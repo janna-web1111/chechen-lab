@@ -8,19 +8,21 @@ The MVP goal is to check whether a user wants to continue learning after the fir
 
 ## Source of Truth
 
-Use the numbered specs in `Spek/` as the main source of truth.
+Use the numbered specs in `спецификации/` as the main source of truth.
 
 Read first:
 
-1. `Spek/09-спецификация-mvp.md`
-2. `Spek/16-план-разработки-mvp.md`
-3. `Spek/17-решения-перед-разработкой-mvp.md`
-4. `Spek/18-контент-mvp-5-тем.md`
-5. `Spek/19-план-и-roadmap-первой-разработки.md`
+1. `спецификации/01-GlobalSpec/09-спецификация-mvp.md`
+2. `планы-разработки/16-план-разработки-mvp.md`
+3. `планы-разработки/17-решения-перед-разработкой-mvp.md`
+4. `спецификации/03-FeatureSpecs/18-контент-mvp-5-тем.md`
+5. `планы-разработки/19-план-и-roadmap-первой-разработки.md`
 
-Functional specs live in:
+Functional specs are split by the project document map:
 
-`Spek/Функции/`
+- `спецификации/02-FunctionalMap/`
+- `спецификации/03-FeatureSpecs/`
+- `спецификации/06-UserStories/`
 
 ## MVP Scope
 
@@ -116,6 +118,25 @@ Then manually check:
 ## Git Workflow For Plans
 
 Every concrete development plan must have its own Git branch.
+
+Development plan files live in:
+
+- `планы-разработки/active/` for plans that are not finished yet;
+- `планы-разработки/completed/` for finished plans kept as history.
+
+When the user asks to create a development plan, create the plan file in `планы-разработки/active/`.
+
+Before pushing a completed plan, move its plan file from `планы-разработки/active/` to `планы-разработки/completed/`.
+
+Roadmap history lives in:
+
+- `дорожная-карта/`
+
+When a plan is completed and the user asks to push, update the roadmap before commit and push:
+
+1. update `дорожная-карта/хронология.md`;
+2. update every touched area file, for example data, frontend, design, AI, or content;
+3. then run checks, commit, push, and create the pull request.
 
 Before starting a new plan:
 
