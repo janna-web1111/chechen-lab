@@ -80,8 +80,14 @@ export function LearningApp() {
   }
 
   const overallProgress = Math.round((progress.completedThemes.length / themes.length) * 100);
+  const activeThemeStudiedCount = activeTheme.cards.filter((card) => progress.studiedCards.includes(card.id)).length;
   const activeThemeCardsStudied = activeTheme.cards.every((card) => progress.studiedCards.includes(card.id));
   const activeThemeCompleted = progress.completedThemes.includes(activeTheme.id);
+  const activeThemeStatusText = activeThemeCompleted
+    ? "Тема завершена: карточки пройдены, квиз сдан."
+    : progress.quizResults[activeTheme.id]
+      ? `Последний квиз: ${progress.quizResults[activeTheme.id].score}%`
+      : "Квиз еще не пройден.";
 
   return (
     <div className="min-h-screen bg-stone-100 text-stone-950">
@@ -135,16 +141,26 @@ export function LearningApp() {
             <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               {themes.map((theme) => {
                 const studiedCount = theme.cards.filter((card) => progress.studiedCards.includes(card.id)).length;
-                const status = progress.completedThemes.includes(theme.id)
-                  ? "Завершена"
-                  : studiedCount > 0
-                    ? `${studiedCount}/${theme.cards.length} карточек`
-                    : "Не начата";
+                const isCompleted = progress.completedThemes.includes(theme.id);
+                const isCurrent = !isCompleted && studiedCount === 0 && theme.order === 1;
+                const status = isCompleted ? "Завершена" : studiedCount > 0 ? `В процессе: ${studiedCount}/${theme.cards.length}` : "Не начата";
 
                 return (
-                  <article className="flex min-h-64 flex-col justify-between rounded-lg border border-stone-300 bg-white p-5" key={theme.id}>
+                  <article
+                    className={`flex min-h-64 flex-col justify-between rounded-lg border bg-white p-5 ${
+                      isCurrent ? "border-emerald-700 ring-2 ring-emerald-100" : "border-stone-300"
+                    }`}
+                    key={theme.id}
+                  >
                     <div>
-                      <span className="text-sm font-bold text-stone-600">Тема {theme.order}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold text-stone-600">Тема {theme.order}</span>
+                        {isCurrent && (
+                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-800">
+                            Начните здесь
+                          </span>
+                        )}
+                      </div>
                       <h2 className="mt-2 text-xl font-black">{theme.title}</h2>
                       <p className="mt-3 leading-6 text-stone-600">{theme.description}</p>
                     </div>
@@ -172,6 +188,11 @@ export function LearningApp() {
             <section className="grid gap-4 md:grid-cols-2">
               <Panel title="Карточки">
                 <ThemeProgress theme={activeTheme} progress={progress} />
+                <p className="mt-4 rounded-lg bg-stone-100 p-3 text-sm font-semibold text-stone-700">
+                  {activeThemeCardsStudied
+                    ? "Карточки пройдены. Теперь можно открыть квиз."
+                    : `Сначала пройдите все карточки: сейчас ${activeThemeStudiedCount}/${activeTheme.cards.length}.`}
+                </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button className="primary-button" type="button" onClick={() => go("cards", { themeId: activeTheme.id, cardIndex: 0 })}>
                     Учить карточки
@@ -188,13 +209,12 @@ export function LearningApp() {
                 </div>
               </Panel>
               <Panel title="Статус">
-                <p className="text-stone-600">
-                  {progress.quizResults[activeTheme.id]
-                    ? `Последний квиз: ${progress.quizResults[activeTheme.id].score}%`
-                    : "Квиз еще не пройден."}
+                <p className="text-stone-600">{activeThemeStatusText}</p>
+                <p className="mt-3 text-sm font-semibold text-stone-700">
+                  Для завершения темы нужны все карточки и результат квиза не ниже {uiStrings.passPercent}%.
                 </p>
                 <p className="mt-4 border-l-4 border-red-700 pl-3 text-stone-600">
-                  Чеченские слова в данных пока отмечены как материал для проверки.
+                  Чеченские слова пока не опубликованы: материал ожидает проверки носителем или ответственным проверяющим.
                 </p>
               </Panel>
             </section>
@@ -302,12 +322,14 @@ function CardsScreen({
         <span>{theme.title}</span>
       </div>
       <div className="grid min-h-80 place-items-center rounded-lg border border-stone-300 bg-stone-100 p-6 text-center">
-        <span className="justify-self-end rounded-full border border-stone-300 bg-white px-3 py-1 text-sm font-bold text-stone-600">
-          {card.verificationStatus}
+        <span className="justify-self-end rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-black text-red-800">
+          Ожидает проверки
         </span>
         <strong className="text-7xl font-black leading-none">{card.ce}</strong>
         <p className="mt-4 text-2xl font-black">{card.ru}</p>
-        <small className="text-stone-600">{card.readingHint}</small>
+        <small className="text-stone-600">
+          {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
+        </small>
       </div>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
         <button className="secondary-button" type="button" disabled={cardIndex === 0} onClick={() => go("cards", { cardIndex: Math.max(0, cardIndex - 1) })}>
@@ -428,9 +450,14 @@ function ReviewScreen({ progress, go }: { progress: UserProgress; go: (screen: S
         {studiedCards.map((card) => (
           <article className="min-h-40 rounded-lg border border-stone-300 bg-white p-5" key={card.id}>
             <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
+            <span className="mt-3 inline-flex rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-black text-red-800">
+              Ожидает проверки
+            </span>
             <strong className="mt-4 block text-4xl font-black">{card.ce}</strong>
             <p className="mt-2 font-bold">{card.ru}</p>
-            <small className="text-stone-600">{card.readingHint}</small>
+            <small className="text-stone-600">
+              {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
+            </small>
           </article>
         ))}
       </section>
