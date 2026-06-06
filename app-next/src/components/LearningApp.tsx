@@ -58,11 +58,14 @@ export function LearningApp() {
 
   function completeTheme(theme: Theme, score: number) {
     if (!progress) return;
+    const allCardsStudied = theme.cards.every((card) => progress.studiedCards.includes(card.id));
+    const shouldCompleteTheme = score >= uiStrings.passPercent && allCardsStudied;
+
     updateProgress({
       ...progress,
-      completedThemes: progress.completedThemes.includes(theme.id)
-        ? progress.completedThemes
-        : [...progress.completedThemes, theme.id],
+      completedThemes: shouldCompleteTheme && !progress.completedThemes.includes(theme.id)
+        ? [...progress.completedThemes, theme.id]
+        : progress.completedThemes,
       quizResults: {
         ...progress.quizResults,
         [theme.id]: { score, completedAt: new Date().toISOString() },
@@ -77,6 +80,8 @@ export function LearningApp() {
   }
 
   const overallProgress = Math.round((progress.completedThemes.length / themes.length) * 100);
+  const activeThemeCardsStudied = activeTheme.cards.every((card) => progress.studiedCards.includes(card.id));
+  const activeThemeCompleted = progress.completedThemes.includes(activeTheme.id);
 
   return (
     <div className="min-h-screen bg-stone-100 text-stone-950">
@@ -171,7 +176,13 @@ export function LearningApp() {
                   <button className="primary-button" type="button" onClick={() => go("cards", { themeId: activeTheme.id, cardIndex: 0 })}>
                     Учить карточки
                   </button>
-                  <button className="secondary-button" type="button" onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })}>
+                  <button
+                    className="secondary-button"
+                    disabled={!activeThemeCardsStudied}
+                    title={activeThemeCardsStudied ? undefined : "Сначала пройдите карточки темы"}
+                    type="button"
+                    onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })}
+                  >
                     Квиз
                   </button>
                 </div>
@@ -214,9 +225,11 @@ export function LearningApp() {
             <p className="eyebrow">{activeTheme.title}</p>
             <h1 className="text-7xl font-black">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
             <p className="mt-4 text-stone-600">
-              {(progress.quizResults[activeTheme.id]?.score ?? 0) >= uiStrings.passPercent
+              {activeThemeCompleted
                 ? "Тема завершена. Можно идти дальше."
-                : "Лучше повторить карточки и пройти квиз еще раз."}
+                : (progress.quizResults[activeTheme.id]?.score ?? 0) >= uiStrings.passPercent
+                  ? "Результат достаточный. Пройдите все карточки темы, чтобы завершить ее."
+                  : "Лучше повторить карточки и пройти квиз еще раз."}
             </p>
             <div className="mt-8 flex justify-center gap-3">
               <button className="primary-button" type="button" onClick={() => go("path")}>К пути</button>
