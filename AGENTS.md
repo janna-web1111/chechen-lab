@@ -135,7 +135,7 @@ Roadmap history lives in:
 When a plan is completed and the user asks to push, update the roadmap before commit and push:
 
 1. update `дорожная-карта/хронология.md`;
-2. update every touched area file, for example data, frontend, design, AI, or content;
+2. update every touched area file, for example data, AI, product/specs, frontend/design, or language content;
 3. then run checks, commit, push, and create the pull request.
 
 Before starting a new plan:
@@ -143,7 +143,7 @@ Before starting a new plan:
 1. Return to `main`.
 2. Update `main` from GitHub.
 3. Create a new branch for the plan.
-4. Use a short branch name that describes the plan, for example `plan/content-review` or `feature/cards-flow`.
+4. Use a short branch name that describes the plan, for example `plan-content-review` or `feature-cards-flow`.
 
 Do not start a new plan from an old feature branch.
 
