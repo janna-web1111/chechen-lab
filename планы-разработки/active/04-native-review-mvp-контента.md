@@ -72,6 +72,15 @@
 ### P0.2. Получить проверку
 
 - Статус: `blocked_by_reviewer`
+- Non-native prefill: `done`
+
+Я заполнил `decision`, `new_status` и `reviewer_comment` как предварительный non-native prefill:
+
+- `decision`: `defer`;
+- `new_status`: `needs_native_review`;
+- `reviewer_comment`: источник, риск или причина, почему нужен проверяющий.
+
+Это не является native review и не переводит материал в `reviewed` или `published`.
 
 Проверить для каждой карточки:
 
