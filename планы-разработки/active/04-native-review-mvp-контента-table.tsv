@@ -1,0 +1,41 @@
+theme	card_id	ru	draft_ce	current_reading_hint	current_status	risk_note	decision	corrected_ce	reading_hint	new_status	reviewer_comment
+greetings	greetings-01	доброе утро (к одному человеку)	IУЬЙРЕ ДИКА ХУЬЛДА ХЬАН!	Ожидает проверки	needs_native_review	Проверить символ I/І, регистр и длину фразы для A0.					
+greetings	greetings-02	добрый день (к одному человеку)	ДЕ ДИКА ХУЬЛДА ХЬАН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+greetings	greetings-03	добрый вечер (к одному человеку)	СУЬЙРЕ ДИКА ХУЬЛДА ХЬАН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+greetings	greetings-04	спокойной ночи (к одному человеку)	БУЬЙСА ДЕКЪАЛА ХУЬЛДА ХЬАН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+greetings	greetings-05	доброе утро всем	IУЬЙРЕ ДИКА ХУЬЛДА ШУН!	Ожидает проверки	needs_native_review	Проверить символ I/І, регистр и длину фразы для A0.					
+greetings	greetings-06	добрый день всем	ДЕ ДИКА ХУЬЛДА ШУН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+greetings	greetings-07	добрый вечер всем	СУЬЙРЕ ДИКА ХУЬЛДА ШУН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+greetings	greetings-08	спокойной ночи всем	БУЬЙСА ДЕКЪАЛА ХУЬЛДА ШУН!	Ожидает проверки	needs_native_review	Проверить регистр и длину фразы для A0.					
+family	family-01	семья	Доьзал	Ожидает проверки	needs_native_review						
+family	family-02	отец	Да	Ожидает проверки	needs_native_review						
+family	family-03	мать	Нана	Ожидает проверки	needs_native_review						
+family	family-04	брат	Ваша	Ожидает проверки	needs_native_review						
+family	family-05	сестра	Йиша	Ожидает проверки	needs_native_review						
+family	family-06	сын	КІант / воІ	Ожидает проверки	needs_native_review	Два варианта через /; для A0 лучше выбрать один основной вариант.					
+family	family-07	дочь	ЙоІ	Ожидает проверки	needs_native_review						
+family	family-08	дедушка	Де да / нена да	Ожидает проверки	needs_native_review	Два варианта через /; возможна зависимость от стороны семьи.					
+home	home-01	дом	ЦІа	Ожидает проверки	needs_native_review						
+home	home-02	комната	Чоь	Ожидает проверки	needs_native_review						
+home	home-03	ключ	ДогІа	Ожидает проверки	needs_native_review						
+home	home-04	ванная	Ваннин чоь	Ожидает проверки	needs_native_review						
+home	home-05	туалет	ХьаштагІа	Ожидает проверки	needs_native_review						
+home	home-06	телевизор	Телевизор	Ожидает проверки	needs_native_review	Заимствование; подтвердить, стоит ли оставлять в MVP.					
+home	home-07	стол	Стол	Ожидает проверки	needs_native_review	Заимствование; подтвердить, стоит ли оставлять в MVP.					
+home	home-08	стул	Г1ант	Ожидает проверки	needs_native_review	Проверить символ 1/І и единый стандарт записи.					
+food	food-01	хлеб	Кхаллар / бепиг	Ожидает проверки	needs_native_review	Два варианта через /; для A0 лучше выбрать один основной вариант.					
+food	food-02	соль	Туьха	Ожидает проверки	needs_native_review						
+food	food-03	молоко	Шура	Ожидает проверки	needs_native_review						
+food	food-04	кефир	Йетта шура	Ожидает проверки	needs_native_review	Проверить, подходит ли фраза/описательное название для A0.					
+food	food-05	вода	Хи	Ожидает проверки	needs_native_review						
+food	food-06	тарелка	Бошхап	Ожидает проверки	needs_native_review						
+food	food-07	чашка	Кад	Ожидает проверки	needs_native_review						
+food	food-08	ложка	Іайг	Ожидает проверки	needs_native_review						
+numbers	numbers-01	один	Цхьаъ	Ожидает проверки	needs_native_review						
+numbers	numbers-02	два	Шиъ	Ожидает проверки	needs_native_review						
+numbers	numbers-03	три	Кхоъ	Ожидает проверки	needs_native_review						
+numbers	numbers-04	четыре	Диъ	Ожидает проверки	needs_native_review						
+numbers	numbers-05	пять	Пхиъ	Ожидает проверки	needs_native_review						
+numbers	numbers-06	шесть	Ялх	Ожидает проверки	needs_native_review						
+numbers	numbers-07	семь	ВорхІ	Ожидает проверки	needs_native_review						
+numbers	numbers-08	восемь	БархІ	Ожидает проверки	needs_native_review						
