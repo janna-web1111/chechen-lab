@@ -217,6 +217,11 @@ export function LearningApp() {
                   Чеченские слова пока не опубликованы: материал ожидает проверки носителем или ответственным проверяющим.
                 </p>
               </Panel>
+              {activeTheme.learningNote && (
+                <Panel title="Короткая заметка">
+                  <p className="text-stone-600">{activeTheme.learningNote}</p>
+                </Panel>
+              )}
             </section>
           </>
         )}

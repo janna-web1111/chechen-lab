@@ -17,6 +17,7 @@ export type Theme = {
   order: number;
   title: string;
   description: string;
+  learningNote?: string;
   status: VerificationStatus;
   cards: StudyCard[];
 };
