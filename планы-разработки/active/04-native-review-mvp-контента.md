@@ -61,6 +61,7 @@
   - `планы-разработки/active/04-native-review-mvp-контента-handoff.md`
   - `планы-разработки/active/04-native-review-mvp-контента-table.tsv`
   - `планы-разработки/active/04-native-review-message-to-reviewer.md`
+  - `планы-разработки/active/04-self-review-greetings.md`
 
 - собрать 40 текущих карточек;
 - указать тему, ID, русский перевод и чеченский текст;
