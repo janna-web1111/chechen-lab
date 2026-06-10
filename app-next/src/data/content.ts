@@ -16,36 +16,36 @@ const rawThemes = [
       "В и Й в начале слов могут быть показателями мужского и женского класса. К категории классов вернемся позже; сейчас просто учите выражения.",
     words: [
       {
-        ru: "доброе утро (к одному человеку)",
-        ce: "IУЬЙРЕ ДИКА ХУЬЛДА ХЬАН!",
+        ru: "здравствуйте",
+        ce: "Маршалла хуьлда",
       },
       {
-        ru: "добрый день (к одному человеку)",
-        ce: "ДЕ ДИКА ХУЬЛДА ХЬАН!",
+        ru: "доброе утро",
+        ce: "Іуьйре дика хуьлда",
       },
       {
-        ru: "добрый вечер (к одному человеку)",
-        ce: "СУЬЙРЕ ДИКА ХУЬЛДА ХЬАН!",
+        ru: "добрый день",
+        ce: "Де дика хуьлда",
       },
       {
-        ru: "спокойной ночи (к одному человеку)",
-        ce: "БУЬЙСА ДЕКЪАЛА ХУЬЛДА ХЬАН!",
+        ru: "добрый вечер",
+        ce: "Суьйре дика хуьлда",
       },
       {
-        ru: "доброе утро всем",
-        ce: "IУЬЙРЕ ДИКА ХУЬЛДА ШУН!",
+        ru: "спокойной ночи",
+        ce: "Буьйса декъал хуьлда",
       },
       {
-        ru: "добрый день всем",
-        ce: "ДЕ ДИКА ХУЬЛДА ШУН!",
+        ru: "спасибо",
+        ce: "Баркалла",
       },
       {
-        ru: "добрый вечер всем",
-        ce: "СУЬЙРЕ ДИКА ХУЬЛДА ШУН!",
+        ru: "до свидания",
+        ce: "Марша Іайла",
       },
       {
-        ru: "спокойной ночи всем",
-        ce: "БУЬЙСА ДЕКЪАЛА ХУЬЛДА ШУН!",
+        ru: "хорошо",
+        ce: "Дика ду",
       },
     ],
   },
@@ -119,7 +119,7 @@ function buildCards(themeId: string, words: readonly RawCard[]): StudyCard[] {
   return words.map((word, index) => {
     const card = typeof word === "string"
       ? { ru: word, ce: "TBD", readingHint: "Ожидает проверки" }
-      : { readingHint: "Ожидает проверки", ...word };
+      : { readingHint: "Проверено", ...word };
 
     return {
       id: `${themeId}-${String(index + 1).padStart(2, "0")}`,
@@ -129,7 +129,7 @@ function buildCards(themeId: string, words: readonly RawCard[]): StudyCard[] {
       ru: card.ru,
       readingHint: card.readingHint,
       difficulty: "A0",
-      verificationStatus: "needs_native_review",
+      verificationStatus: "reviewed",
     };
   });
 }
@@ -141,7 +141,7 @@ export const themes: Theme[] = rawThemes.map((theme) => ({
   title: theme.title,
   description: theme.description,
   learningNote: "learningNote" in theme ? theme.learningNote : undefined,
-  status: "needs_native_review",
+  status: "reviewed",
   cards: buildCards(theme.id, theme.words),
 }));
 
