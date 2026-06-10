@@ -302,6 +302,8 @@ function ThemeProgress({ theme, progress }: { theme: Theme; progress: UserProgre
 }
 
 function ContentStatusNote({ status }: { status: VerificationStatus }) {
+  const badge = verificationBadge(status);
+
   if (status === "needs_native_review") {
     return (
       <p className="mt-4 border-l-4 border-red-700 pl-3 text-stone-600">
@@ -312,7 +314,7 @@ function ContentStatusNote({ status }: { status: VerificationStatus }) {
 
   return (
     <p className="mt-4 border-l-4 border-emerald-700 pl-3 text-stone-600">
-      Чеченский контент проверен ответственным проверяющим. Статус: {status}.
+      Чеченский контент проверен ответственным проверяющим. Статус: {badge.text}.
     </p>
   );
 }
