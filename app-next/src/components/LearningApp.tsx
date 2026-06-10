@@ -90,11 +90,11 @@ export function LearningApp() {
       : "Квиз еще не пройден.";
 
   return (
-    <div className="min-h-screen bg-stone-100 text-stone-950">
-      <header className="sticky top-0 z-10 border-b border-stone-300 bg-stone-100/95 px-4 py-3 backdrop-blur">
+    <div className="min-h-screen bg-background text-stone-950">
+      <header className="sticky top-0 z-10 border-b border-emerald-950/10 bg-background/90 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <button className="flex items-center gap-3 text-left" type="button" onClick={() => go("home")}>
-            <span className="grid size-11 place-items-center rounded-lg bg-stone-950 text-sm font-black text-white">CL</span>
+            <span className="grid size-11 place-items-center rounded-lg bg-emerald-900 text-sm font-black text-white shadow-sm">CL</span>
             <span>
               <span className="block font-black">{uiStrings.appName}</span>
               <span className="block text-sm font-semibold text-stone-600">{uiStrings.levelLabel}</span>
@@ -111,7 +111,7 @@ export function LearningApp() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
         {appState.screen === "home" && (
           <section className="grid min-h-[calc(100vh-9rem)] gap-6 md:grid-cols-[1fr_320px]">
-            <div className="flex flex-col justify-center rounded-lg border border-stone-300 bg-white p-8 shadow-sm md:p-14">
+            <div className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-white to-emerald-50 p-8 shadow-sm md:p-14">
               <p className="eyebrow">{uiStrings.levelLabel}</p>
               <h1 className="max-w-3xl text-5xl font-black leading-none tracking-normal md:text-7xl">
                 Первый путь изучения чеченского
@@ -124,11 +124,14 @@ export function LearningApp() {
                 <button className="secondary-button" type="button" onClick={() => go("review")}>Повторить слова</button>
               </div>
             </div>
-            <aside className="flex flex-col justify-center rounded-lg border border-stone-300 bg-white p-6 shadow-sm">
+            <aside className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
               <span className="text-sm font-bold text-stone-600">Общий прогресс</span>
               <strong className="my-3 text-5xl font-black">{overallProgress}%</strong>
               <ProgressBar value={overallProgress} />
               <p className="mt-4 text-stone-600">{progress.completedThemes.length} из {themes.length} тем завершено</p>
+              <div className="mt-6 rounded-lg bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+                5 тем, карточки, квиз и повторение без регистрации.
+              </div>
             </aside>
           </section>
         )}
@@ -147,14 +150,14 @@ export function LearningApp() {
 
                 return (
                   <article
-                    className={`flex min-h-64 flex-col justify-between rounded-lg border bg-white p-5 ${
-                      isCurrent ? "border-emerald-700 ring-2 ring-emerald-100" : "border-stone-300"
+                    className={`flex min-h-64 flex-col justify-between rounded-lg border bg-white p-5 shadow-sm transition ${
+                      isCurrent ? "border-emerald-700 ring-2 ring-emerald-100" : "border-emerald-950/10 hover:border-emerald-700/40"
                     }`}
                     key={theme.id}
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-bold text-stone-600">Тема {theme.order}</span>
+                        <span className="grid size-8 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-emerald-900">{theme.order}</span>
                         {isCurrent && (
                           <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-800">
                             Начните здесь
@@ -165,7 +168,7 @@ export function LearningApp() {
                       <p className="mt-3 leading-6 text-stone-600">{theme.description}</p>
                     </div>
                     <div className="mt-4 grid gap-3">
-                      <div className="flex justify-between gap-2 text-sm font-semibold text-stone-600">
+                      <div className="flex justify-between gap-2 rounded-lg bg-slate-50 p-3 text-sm font-semibold text-stone-600">
                         <span>{theme.cards.length} карточек</span>
                         <span>{status}</span>
                       </div>
@@ -244,9 +247,9 @@ export function LearningApp() {
         )}
 
         {appState.screen === "result" && (
-          <section className="mx-auto max-w-3xl rounded-lg border border-stone-300 bg-white p-8 text-center shadow-sm">
+          <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
             <p className="eyebrow">{activeTheme.title}</p>
-            <h1 className="text-7xl font-black">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
+            <h1 className="text-7xl font-black text-emerald-900">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
             <p className="mt-4 text-stone-600">
               {activeThemeCompleted
                 ? "Тема завершена. Можно идти дальше."
@@ -281,7 +284,7 @@ function SectionHead({ eyebrow, title, children }: { eyebrow: string; title: str
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-stone-300 bg-white p-6 shadow-sm">
+    <section className="rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-black">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -359,16 +362,16 @@ function CardsScreen({
   }, [card.id, markCardStudied]);
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-stone-300 bg-white p-6 shadow-sm md:p-9">
+    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Карточка {cardIndex + 1} из {theme.cards.length}</span>
         <span>{theme.title}</span>
       </div>
-      <div className="grid min-h-80 place-items-center rounded-lg border border-stone-300 bg-stone-100 p-6 text-center">
+      <div className="grid min-h-80 place-items-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
         <span className={`justify-self-end rounded-full border px-3 py-1 text-sm font-black ${badge.className}`}>
           {badge.text}
         </span>
-        <strong className="text-7xl font-black leading-none">{card.ce}</strong>
+        <strong className="text-6xl font-black leading-none text-emerald-950 md:text-7xl">{card.ce}</strong>
         <p className="mt-4 text-2xl font-black">{card.ru}</p>
         <small className="text-stone-600">
           {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
@@ -431,7 +434,7 @@ function QuizScreen({
   }
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-stone-300 bg-white p-6 shadow-sm md:p-9">
+    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Вопрос {state.quizIndex + 1} из {quiz.length}</span>
         <span>{theme.title}</span>
@@ -445,7 +448,7 @@ function QuizScreen({
 
           return (
             <button
-              className={`min-h-16 rounded-lg border border-stone-300 px-4 text-left font-bold ${stateClass}`}
+              className={`min-h-16 rounded-lg border border-emerald-950/10 bg-white px-4 text-left font-bold transition hover:border-emerald-700/50 ${stateClass}`}
               disabled={answered}
               key={option.id}
               type="button"
@@ -456,7 +459,7 @@ function QuizScreen({
           );
         })}
       </div>
-      {answered && <p className="mt-5 rounded-lg bg-stone-100 p-4 text-stone-700">{question.explanation}</p>}
+      {answered && <p className="mt-5 rounded-lg bg-emerald-50 p-4 font-semibold text-emerald-950">{question.explanation}</p>}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
         <button className="secondary-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>В тему</button>
         <button className="primary-button" type="button" disabled={!answered} onClick={nextQuestion}>
@@ -476,7 +479,7 @@ function ReviewScreen({ progress, go }: { progress: UserProgress; go: (screen: S
 
   if (!studiedCards.length) {
     return (
-      <section className="mx-auto max-w-2xl rounded-lg border border-stone-300 bg-white p-8 text-center shadow-sm">
+      <section className="mx-auto max-w-2xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
         <h1 className="text-4xl font-black">Пока нечего повторять</h1>
         <p className="mt-4 text-stone-600">Пройдите карточки первой темы, и они появятся здесь.</p>
         <button className="primary-button mt-6" type="button" onClick={() => go("path")}>К пути</button>
@@ -506,7 +509,7 @@ function ReviewCard({
   const badge = verificationBadge(card.verificationStatus);
 
   return (
-    <article className="min-h-40 rounded-lg border border-stone-300 bg-white p-5">
+    <article className="min-h-40 rounded-lg border border-emerald-950/10 bg-white p-5 shadow-sm">
       <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
       <span className={`mt-3 inline-flex rounded-full border px-2.5 py-1 text-xs font-black ${badge.className}`}>
         {badge.text}

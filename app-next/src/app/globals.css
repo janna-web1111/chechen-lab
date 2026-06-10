@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f3ee;
-  --foreground: #1c2522;
+  --background: #eef4f0;
+  --foreground: #16231f;
 }
 
 @theme inline {
@@ -28,7 +28,7 @@ button:disabled {
 }
 
 .eyebrow {
-  color: #b43f2f;
+  color: #1f6f5b;
   font-size: 0.82rem;
   font-weight: 850;
   letter-spacing: 0;
@@ -39,13 +39,16 @@ button:disabled {
   min-height: 44px;
   border-radius: 0.5rem;
   background: #1f6f5b;
-  padding: 0 1rem;
+  padding: 0 1.1rem;
   color: white;
   font-weight: 800;
+  box-shadow: 0 10px 18px -14px #123c33;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
 .primary-button:hover {
   background: #174f42;
+  transform: translateY(-1px);
 }
 
 .secondary-button,
@@ -54,14 +57,17 @@ button:disabled {
   border: 1px solid #d6d3ca;
   border-radius: 0.5rem;
   background: white;
-  padding: 0 1rem;
+  padding: 0 1.1rem;
   color: #1c2522;
   font-weight: 800;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
 .secondary-button:hover,
 .nav-button:hover {
+  background: #f6faf7;
   border-color: #1f6f5b;
+  transform: translateY(-1px);
 }
 
 .primary-button:focus-visible,
