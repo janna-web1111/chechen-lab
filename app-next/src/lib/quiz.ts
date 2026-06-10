@@ -1,20 +1,30 @@
 import type { QuizQuestion, Theme } from "@/types/content";
 
-function placeCorrectOption<T>(correctOption: T, wrongOptions: T[], questionIndex: number, themeOrder: number): T[] {
-  const options = [...wrongOptions];
-  const correctIndex = (questionIndex * 3 + themeOrder) % (wrongOptions.length + 1);
-  options.splice(correctIndex, 0, correctOption);
-  return options;
+function hashString(value: string): number {
+  return Array.from(value).reduce((hash, character) => Math.imul(31, hash) + character.charCodeAt(0), 0);
 }
 
-export function buildQuiz(theme: Theme): QuizQuestion[] {
+function shuffleBySeed<T>(items: T[], seed: string): T[] {
+  let state = hashString(seed) >>> 0;
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    state = Math.imul(1664525, state) + 1013904223;
+    const swapIndex = (state >>> 0) % (index + 1);
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+
+  return shuffled;
+}
+
+export function buildQuiz(theme: Theme, attemptSeed = "default"): QuizQuestion[] {
   return theme.cards.slice(0, 5).map((card, index) => {
     const wrongCards = theme.cards
       .filter((candidate) => candidate.id !== card.id)
       .slice(index + 1)
       .concat(theme.cards.filter((candidate) => candidate.id !== card.id).slice(0, index + 1))
       .slice(0, 3);
-    const options = placeCorrectOption(card, wrongCards, index, theme.order);
+    const options = shuffleBySeed([card, ...wrongCards], `${attemptSeed}-${theme.id}-${card.id}-${index}`);
 
     return {
       id: `${theme.id}-q${String(index + 1).padStart(2, "0")}`,

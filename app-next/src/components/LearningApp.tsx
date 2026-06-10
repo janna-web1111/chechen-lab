@@ -15,6 +15,7 @@ type AppState = {
   themeId: string | null;
   cardIndex: number;
   quizIndex: number;
+  quizSeed: string | null;
   quizAnswers: string[];
   selectedAnswer: string | null;
 };
@@ -24,9 +25,14 @@ const initialState: AppState = {
   themeId: null,
   cardIndex: 0,
   quizIndex: 0,
+  quizSeed: null,
   quizAnswers: [],
   selectedAnswer: null,
 };
+
+function createQuizSeed(themeId: string) {
+  return `${themeId}-${Date.now()}-${Math.random()}`;
+}
 
 export function LearningApp() {
   const [appState, setAppState] = useState<AppState>(initialState);
@@ -205,7 +211,7 @@ export function LearningApp() {
                     disabled={!activeThemeCardsStudied}
                     title={activeThemeCardsStudied ? undefined : "Сначала пройдите карточки темы"}
                     type="button"
-                    onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })}
+                    onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizSeed: createQuizSeed(activeTheme.id), quizAnswers: [], selectedAnswer: null })}
                   >
                     Квиз
                   </button>
@@ -386,7 +392,7 @@ function CardsScreen({
           type="button"
           onClick={() =>
             cardIndex === theme.cards.length - 1
-              ? go("quiz", { themeId: theme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })
+              ? go("quiz", { themeId: theme.id, quizIndex: 0, quizSeed: createQuizSeed(theme.id), quizAnswers: [], selectedAnswer: null })
               : go("cards", { cardIndex: cardIndex + 1 })
           }
         >
@@ -410,7 +416,7 @@ function QuizScreen({
   completeTheme: (theme: Theme, score: number) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
 }) {
-  const quiz = buildQuiz(theme);
+  const quiz = buildQuiz(theme, state.quizSeed ?? "default");
   const question = quiz[state.quizIndex];
   const answered = Boolean(state.selectedAnswer);
 
