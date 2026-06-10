@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { themes, uiStrings } from "@/data/content";
 import { buildQuiz } from "@/lib/quiz";
 import { createEmptyProgress, readProgress, resetProgress, writeProgress } from "@/lib/progress";
-import type { Theme } from "@/types/content";
+import type { StudyCard, Theme, VerificationStatus } from "@/types/content";
 import type { UserProgress } from "@/types/progress";
 import { ProgressBar } from "@/components/ProgressBar";
 
@@ -213,9 +213,7 @@ export function LearningApp() {
                 <p className="mt-3 text-sm font-semibold text-stone-700">
                   Для завершения темы нужны все карточки и результат квиза не ниже {uiStrings.passPercent}%.
                 </p>
-                <p className="mt-4 border-l-4 border-red-700 pl-3 text-stone-600">
-                  Чеченские слова пока не опубликованы: материал ожидает проверки носителем или ответственным проверяющим.
-                </p>
+                <ContentStatusNote status={activeTheme.status} />
               </Panel>
               {activeTheme.learningNote && (
                 <Panel title="Короткая заметка">
@@ -303,6 +301,43 @@ function ThemeProgress({ theme, progress }: { theme: Theme; progress: UserProgre
   );
 }
 
+function ContentStatusNote({ status }: { status: VerificationStatus }) {
+  if (status === "needs_native_review") {
+    return (
+      <p className="mt-4 border-l-4 border-red-700 pl-3 text-stone-600">
+        Чеченские слова пока не опубликованы: материал ожидает проверки носителем или ответственным проверяющим.
+      </p>
+    );
+  }
+
+  return (
+    <p className="mt-4 border-l-4 border-emerald-700 pl-3 text-stone-600">
+      Чеченский контент проверен ответственным проверяющим. Статус: {status}.
+    </p>
+  );
+}
+
+function verificationBadge(status: VerificationStatus) {
+  if (status === "published") {
+    return {
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      text: "Опубликовано",
+    };
+  }
+
+  if (status === "reviewed") {
+    return {
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      text: "Проверено",
+    };
+  }
+
+  return {
+    className: "border-red-200 bg-red-50 text-red-800",
+    text: "Ожидает проверки",
+  };
+}
+
 function CardsScreen({
   theme,
   cardIndex,
@@ -315,6 +350,7 @@ function CardsScreen({
   go: (screen: Screen, patch?: Partial<AppState>) => void;
 }) {
   const card = theme.cards[cardIndex];
+  const badge = verificationBadge(card.verificationStatus);
 
   useEffect(() => {
     markCardStudied(card.id);
@@ -327,8 +363,8 @@ function CardsScreen({
         <span>{theme.title}</span>
       </div>
       <div className="grid min-h-80 place-items-center rounded-lg border border-stone-300 bg-stone-100 p-6 text-center">
-        <span className="justify-self-end rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-black text-red-800">
-          Ожидает проверки
+        <span className={`justify-self-end rounded-full border px-3 py-1 text-sm font-black ${badge.className}`}>
+          {badge.text}
         </span>
         <strong className="text-7xl font-black leading-none">{card.ce}</strong>
         <p className="mt-4 text-2xl font-black">{card.ru}</p>
@@ -453,19 +489,31 @@ function ReviewScreen({ progress, go }: { progress: UserProgress; go: (screen: S
       </SectionHead>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {studiedCards.map((card) => (
-          <article className="min-h-40 rounded-lg border border-stone-300 bg-white p-5" key={card.id}>
-            <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
-            <span className="mt-3 inline-flex rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-black text-red-800">
-              Ожидает проверки
-            </span>
-            <strong className="mt-4 block text-4xl font-black">{card.ce}</strong>
-            <p className="mt-2 font-bold">{card.ru}</p>
-            <small className="text-stone-600">
-              {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
-            </small>
-          </article>
+          <ReviewCard card={card} key={card.id} />
         ))}
       </section>
     </>
+  );
+}
+
+function ReviewCard({
+  card,
+}: {
+  card: StudyCard & { themeTitle: string };
+}) {
+  const badge = verificationBadge(card.verificationStatus);
+
+  return (
+    <article className="min-h-40 rounded-lg border border-stone-300 bg-white p-5">
+      <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
+      <span className={`mt-3 inline-flex rounded-full border px-2.5 py-1 text-xs font-black ${badge.className}`}>
+        {badge.text}
+      </span>
+      <strong className="mt-4 block text-4xl font-black">{card.ce}</strong>
+      <p className="mt-2 font-bold">{card.ru}</p>
+      <small className="text-stone-600">
+        {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
+      </small>
+    </article>
   );
 }

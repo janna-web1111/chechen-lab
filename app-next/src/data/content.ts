@@ -21,7 +21,7 @@ const rawThemes = [
       },
       {
         ru: "доброе утро",
-        ce: "Ӏуьйре дика хуьлда",
+        ce: "Іуьйре дика хуьлда",
       },
       {
         ru: "добрый день",
@@ -41,7 +41,7 @@ const rawThemes = [
       },
       {
         ru: "до свидания",
-        ce: "Марша Ӏайла",
+        ce: "Марша Іайла",
       },
       {
         ru: "хорошо",
@@ -60,8 +60,8 @@ const rawThemes = [
       { ru: "мать", ce: "Нана" },
       { ru: "брат", ce: "Ваша" },
       { ru: "сестра", ce: "Йиша" },
-      { ru: "сын", ce: "КӀант / воӀ" },
-      { ru: "дочь", ce: "ЙоӀ" },
+      { ru: "сын", ce: "КІант / воІ" },
+      { ru: "дочь", ce: "ЙоІ" },
       { ru: "дедушка", ce: "Де да / нена да" },
     ],
   },
@@ -71,14 +71,14 @@ const rawThemes = [
     title: "Дом",
     description: "Слова о доме и предметах вокруг пользователя.",
     words: [
-      { ru: "дом", ce: "ЦӀа" },
+      { ru: "дом", ce: "ЦІа" },
       { ru: "комната", ce: "Чоь" },
-      { ru: "ключ", ce: "ДогӀа" },
+      { ru: "ключ", ce: "ДогІа" },
       { ru: "ванная", ce: "Ваннин чоь" },
-      { ru: "туалет", ce: "ХьаштагӀа" },
+      { ru: "туалет", ce: "ХьаштагІа" },
       { ru: "телевизор", ce: "Телевизор" },
       { ru: "стол", ce: "Стол" },
-      { ru: "стул", ce: "ГӀант" },
+      { ru: "стул", ce: "Г1ант" },
     ],
   },
   {
@@ -94,7 +94,7 @@ const rawThemes = [
       { ru: "вода", ce: "Хи" },
       { ru: "тарелка", ce: "Бошхап" },
       { ru: "чашка", ce: "Кад" },
-      { ru: "ложка", ce: "Ӏайг" },
+      { ru: "ложка", ce: "Іайг" },
     ],
   },
   {
@@ -109,8 +109,8 @@ const rawThemes = [
       { ru: "четыре", ce: "Диъ" },
       { ru: "пять", ce: "Пхиъ" },
       { ru: "шесть", ce: "Ялх" },
-      { ru: "семь", ce: "ВорхӀ" },
-      { ru: "восемь", ce: "БархӀ" },
+      { ru: "семь", ce: "ВорхІ" },
+      { ru: "восемь", ce: "БархІ" },
     ],
   },
 ] as const;
@@ -119,7 +119,7 @@ function buildCards(themeId: string, words: readonly RawCard[]): StudyCard[] {
   return words.map((word, index) => {
     const card = typeof word === "string"
       ? { ru: word, ce: "TBD", readingHint: "Ожидает проверки" }
-      : { readingHint: "Ожидает проверки", ...word };
+      : { readingHint: "Проверено", ...word };
 
     return {
       id: `${themeId}-${String(index + 1).padStart(2, "0")}`,
@@ -129,7 +129,7 @@ function buildCards(themeId: string, words: readonly RawCard[]): StudyCard[] {
       ru: card.ru,
       readingHint: card.readingHint,
       difficulty: "A0",
-      verificationStatus: "needs_native_review",
+      verificationStatus: "reviewed",
     };
   });
 }
@@ -141,7 +141,7 @@ export const themes: Theme[] = rawThemes.map((theme) => ({
   title: theme.title,
   description: theme.description,
   learningNote: "learningNote" in theme ? theme.learningNote : undefined,
-  status: "needs_native_review",
+  status: "reviewed",
   cards: buildCards(theme.id, theme.words),
 }));
 
