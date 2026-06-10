@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { themes, uiStrings } from "@/data/content";
 import { buildQuiz } from "@/lib/quiz";
 import { createEmptyProgress, readProgress, resetProgress, writeProgress } from "@/lib/progress";
@@ -416,7 +416,7 @@ function QuizScreen({
   completeTheme: (theme: Theme, score: number) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
 }) {
-  const quiz = buildQuiz(theme, state.quizSeed ?? "default");
+  const quiz = useMemo(() => buildQuiz(theme, state.quizSeed ?? "default"), [state.quizSeed, theme]);
   const question = quiz[state.quizIndex];
   const answered = Boolean(state.selectedAnswer);
 
@@ -428,7 +428,7 @@ function QuizScreen({
     });
   }
 
-  function nextQuestion() {
+  const nextQuestion = useCallback(() => {
     if (state.quizIndex === quiz.length - 1) {
       const correctCount = quiz.filter((item, index) => state.quizAnswers[index] === item.correctCardId).length;
       completeTheme(theme, Math.round((correctCount / quiz.length) * 100));
@@ -437,7 +437,20 @@ function QuizScreen({
     }
 
     go("quiz", { quizIndex: state.quizIndex + 1, selectedAnswer: null });
-  }
+  }, [completeTheme, go, quiz, state.quizAnswers, state.quizIndex, theme]);
+
+  useEffect(() => {
+    if (!answered) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      nextQuestion();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [answered, nextQuestion]);
 
   return (
     <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
