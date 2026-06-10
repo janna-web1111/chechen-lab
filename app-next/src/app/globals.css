@@ -98,6 +98,14 @@ button:disabled {
   transform: translateY(4px);
 }
 
+.compact-button {
+  min-height: 38px;
+  border-radius: 16px;
+  padding: 0 0.95rem;
+  font-size: 0.9rem;
+  box-shadow: 0 3px 0 var(--color-dark-green);
+}
+
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .nav-button:focus-visible,

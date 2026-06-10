@@ -16,6 +16,8 @@ type AppState = {
   cardIndex: number;
   quizIndex: number;
   quizSeed: string | null;
+  quizStartedAt: number | null;
+  quizDurationSeconds: number | null;
   quizAnswers: string[];
   selectedAnswer: string | null;
 };
@@ -26,12 +28,24 @@ const initialState: AppState = {
   cardIndex: 0,
   quizIndex: 0,
   quizSeed: null,
+  quizStartedAt: null,
+  quizDurationSeconds: null,
   quizAnswers: [],
   selectedAnswer: null,
 };
 
 function createQuizSeed(themeId: string) {
   return `${themeId}-${Date.now()}-${Math.random()}`;
+}
+
+function formatDuration(totalSeconds: number) {
+  const safeSeconds = Math.max(0, Math.round(totalSeconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  if (minutes === 0) return `${seconds} сек.`;
+
+  return `${minutes} мин. ${seconds.toString().padStart(2, "0")} сек.`;
 }
 
 const themeIcons = ["🌱", "👋", "🏠", "🍞", "🔢"];
@@ -64,7 +78,7 @@ export function LearningApp() {
     updateProgress({ ...progress, studiedCards: [...progress.studiedCards, cardId] });
   }
 
-  function completeTheme(theme: Theme, score: number) {
+  function completeTheme(theme: Theme, score: number, durationSeconds: number) {
     if (!progress) return;
     const allCardsStudied = theme.cards.every((card) => progress.studiedCards.includes(card.id));
     const shouldCompleteTheme = score >= uiStrings.passPercent && allCardsStudied;
@@ -76,7 +90,7 @@ export function LearningApp() {
         : progress.completedThemes,
       quizResults: {
         ...progress.quizResults,
-        [theme.id]: { score, completedAt: new Date().toISOString() },
+        [theme.id]: { score, completedAt: new Date().toISOString(), durationSeconds },
       },
     });
   }
@@ -96,6 +110,43 @@ export function LearningApp() {
     : progress.quizResults[activeTheme.id]
       ? `Последний квиз: ${progress.quizResults[activeTheme.id].score}%`
       : "Квиз еще не пройден.";
+  const quizDuration = appState.quizDurationSeconds ?? progress.quizResults[activeTheme.id]?.durationSeconds;
+
+  function startQuiz(themeId: string) {
+    go("quiz", {
+      themeId,
+      quizIndex: 0,
+      quizSeed: createQuizSeed(themeId),
+      quizStartedAt: Date.now(),
+      quizDurationSeconds: null,
+      quizAnswers: [],
+      selectedAnswer: null,
+    });
+  }
+
+  function goBack() {
+    if (appState.screen === "path") {
+      go("home");
+      return;
+    }
+
+    if (appState.screen === "theme") {
+      go("path");
+      return;
+    }
+
+    if (appState.screen === "cards" || appState.screen === "quiz" || appState.screen === "result") {
+      go("theme", { themeId: activeTheme.id });
+      return;
+    }
+
+    if (appState.screen === "rules" && appState.themeId) {
+      go("theme", { themeId: appState.themeId });
+      return;
+    }
+
+    go("home");
+  }
 
   return (
     <div className="app-shell min-h-screen">
@@ -118,24 +169,32 @@ export function LearningApp() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
+        {appState.screen !== "home" && (
+          <div className="mb-5">
+            <button className="secondary-button compact-button" type="button" onClick={goBack}>
+              &lt; Назад
+            </button>
+          </div>
+        )}
+
         {appState.screen === "home" && (
-          <section className="grid min-h-[calc(100vh-9rem)] gap-6 md:grid-cols-[1fr_320px]">
-            <div className="hero-panel flex flex-col justify-center p-8 md:p-14">
+          <section className="grid gap-5 md:grid-cols-[1fr_300px]">
+            <div className="hero-panel flex flex-col justify-center p-6 md:p-10">
               <p className="eyebrow">{uiStrings.levelLabel}</p>
-              <h1 className="max-w-3xl text-5xl font-black leading-none tracking-normal text-[#2f4f4f] md:text-7xl">
+              <h1 className="max-w-2xl text-4xl font-black leading-tight tracking-normal text-[#2f4f4f] md:text-5xl">
                 Первый путь изучения чеченского
               </h1>
-              <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-stone-700">
+              <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-stone-700">
                 Короткие темы, карточки, квиз и локальный прогресс без регистрации.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap gap-3">
                 <button className="primary-button" type="button" onClick={() => go("path")}>Начать обучение</button>
                 <button className="secondary-button" type="button" onClick={() => go("review")}>Повторить слова</button>
               </div>
             </div>
-            <aside className="progress-card flex flex-col justify-center p-6">
+            <aside className="progress-card flex flex-col justify-center p-5">
               <span className="text-sm font-bold text-stone-600">Общий прогресс</span>
-              <strong className="my-3 text-5xl font-black text-[#2f4f4f]">{overallProgress}%</strong>
+              <strong className="my-3 text-4xl font-black text-[#2f4f4f]">{overallProgress}%</strong>
               <ProgressBar value={overallProgress} />
               <p className="mt-4 text-stone-600">{progress.completedThemes.length} из {themes.length} тем завершено</p>
               <div className="soft-pill mt-6 p-4 text-sm font-semibold">
@@ -150,7 +209,7 @@ export function LearningApp() {
             <SectionHead eyebrow={uiStrings.levelLabel} title="Путь обучения">
               Начните с первой незавершенной темы или вернитесь к уже открытой.
             </SectionHead>
-            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <section className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-5">
               {themes.map((theme) => {
                 const studiedCount = theme.cards.filter((card) => progress.studiedCards.includes(card.id)).length;
                 const isCompleted = progress.completedThemes.includes(theme.id);
@@ -160,29 +219,29 @@ export function LearningApp() {
 
                 return (
                   <article
-                    className={`topic-card flex min-h-64 flex-col justify-between p-5 ${
+                    className={`topic-card flex min-h-44 flex-col justify-between p-3 ${
                       isCurrent ? "topic-card-current" : ""
                     }`}
                     key={theme.id}
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="theme-number grid size-10 place-items-center text-lg font-black">{icon}</span>
+                        <span className="theme-number grid size-8 place-items-center text-sm font-black">{icon}</span>
                         {isCurrent && (
-                          <span className="soft-pill px-2.5 py-1 text-xs font-black">
+                          <span className="soft-pill px-2 py-1 text-[11px] font-black">
                             Начните здесь
                           </span>
                         )}
                       </div>
-                      <h2 className="mt-3 text-xl font-black text-[#2f4f4f]">{theme.title}</h2>
-                      <p className="mt-3 leading-6 text-stone-600">{theme.description}</p>
+                      <h2 className="mt-2 text-base font-black text-[#2f4f4f]">{theme.title}</h2>
+                      <p className="mt-1.5 text-xs leading-4 text-stone-600">{theme.description}</p>
                     </div>
-                    <div className="mt-4 grid gap-3">
-                      <div className="soft-pill flex justify-between gap-2 p-3 text-sm font-semibold">
+                    <div className="mt-2.5 grid gap-2">
+                      <div className="soft-pill flex justify-between gap-2 p-2 text-[11px] font-semibold">
                         <span>{theme.cards.length} карточек</span>
                         <span>{status}</span>
                       </div>
-                      <button className="secondary-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>
+                      <button className="secondary-button compact-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>
                         Открыть
                       </button>
                     </div>
@@ -215,7 +274,7 @@ export function LearningApp() {
                     disabled={!activeThemeCardsStudied}
                     title={activeThemeCardsStudied ? undefined : "Сначала пройдите карточки темы"}
                     type="button"
-                    onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizSeed: createQuizSeed(activeTheme.id), quizAnswers: [], selectedAnswer: null })}
+                    onClick={() => startQuiz(activeTheme.id)}
                   >
                     Квиз
                   </button>
@@ -243,6 +302,7 @@ export function LearningApp() {
             cardIndex={appState.cardIndex}
             markCardStudied={markCardStudied}
             go={go}
+            startQuiz={startQuiz}
           />
         )}
 
@@ -260,6 +320,11 @@ export function LearningApp() {
           <section className="result-card mx-auto max-w-3xl p-8 text-center">
             <p className="eyebrow">{activeTheme.title}</p>
             <h1 className="text-7xl font-black text-[#2f4f4f]">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
+            {typeof quizDuration === "number" && (
+              <p className="soft-pill mx-auto mt-4 max-w-sm p-3 text-lg font-black">
+                Время квиза: {formatDuration(quizDuration)}
+              </p>
+            )}
             <p className="mt-4 font-semibold text-stone-600">
               {activeThemeCompleted
                 ? "Тема завершена. Можно идти дальше."
@@ -360,11 +425,13 @@ function CardsScreen({
   cardIndex,
   markCardStudied,
   go,
+  startQuiz,
 }: {
   theme: Theme;
   cardIndex: number;
   markCardStudied: (cardId: string) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
+  startQuiz: (themeId: string) => void;
 }) {
   const card = theme.cards[cardIndex];
   const badge = verificationBadge(card.verificationStatus);
@@ -398,7 +465,7 @@ function CardsScreen({
           type="button"
           onClick={() =>
             cardIndex === theme.cards.length - 1
-              ? go("quiz", { themeId: theme.id, quizIndex: 0, quizSeed: createQuizSeed(theme.id), quizAnswers: [], selectedAnswer: null })
+              ? startQuiz(theme.id)
               : go("cards", { cardIndex: cardIndex + 1 })
           }
         >
@@ -419,12 +486,15 @@ function QuizScreen({
   theme: Theme;
   state: AppState;
   setState: React.Dispatch<React.SetStateAction<AppState>>;
-  completeTheme: (theme: Theme, score: number) => void;
+  completeTheme: (theme: Theme, score: number, durationSeconds: number) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
 }) {
+  const [now, setNow] = useState(state.quizStartedAt ?? 0);
   const quiz = useMemo(() => buildQuiz(theme, state.quizSeed ?? "default"), [state.quizSeed, theme]);
   const question = quiz[state.quizIndex];
   const answered = Boolean(state.selectedAnswer);
+  const startedAt = state.quizStartedAt ?? now;
+  const elapsedSeconds = Math.max(0, Math.floor((now - startedAt) / 1000));
 
   function chooseAnswer(cardId: string) {
     setState((current) => {
@@ -437,13 +507,19 @@ function QuizScreen({
   const nextQuestion = useCallback(() => {
     if (state.quizIndex === quiz.length - 1) {
       const correctCount = quiz.filter((item, index) => state.quizAnswers[index] === item.correctCardId).length;
-      completeTheme(theme, Math.round((correctCount / quiz.length) * 100));
-      go("result");
+      const durationSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+      completeTheme(theme, Math.round((correctCount / quiz.length) * 100), durationSeconds);
+      go("result", { quizDurationSeconds: durationSeconds });
       return;
     }
 
     go("quiz", { quizIndex: state.quizIndex + 1, selectedAnswer: null });
-  }, [completeTheme, go, quiz, state.quizAnswers, state.quizIndex, theme]);
+  }, [completeTheme, go, quiz, startedAt, state.quizAnswers, state.quizIndex, theme]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!answered) return;
@@ -462,6 +538,7 @@ function QuizScreen({
     <section className="quiz-shell mx-auto max-w-3xl p-6 text-center md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Вопрос {state.quizIndex + 1} из {quiz.length}</span>
+        <span>Время: {formatDuration(elapsedSeconds)}</span>
         <span>{theme.title}</span>
       </div>
       <h1 className="text-3xl font-black text-[#2f4f4f]">{question.prompt}</h1>
