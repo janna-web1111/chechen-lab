@@ -8,7 +8,7 @@ import type { StudyCard, Theme, VerificationStatus } from "@/types/content";
 import type { UserProgress } from "@/types/progress";
 import { ProgressBar } from "@/components/ProgressBar";
 
-type Screen = "home" | "path" | "theme" | "cards" | "quiz" | "result" | "review";
+type Screen = "home" | "path" | "theme" | "cards" | "quiz" | "result" | "review" | "rules";
 
 type AppState = {
   screen: Screen;
@@ -110,6 +110,7 @@ export function LearningApp() {
           </button>
           <nav className="flex flex-wrap gap-2">
             <button className="nav-button" type="button" onClick={() => go("path")}>Путь</button>
+            <button className="nav-button" type="button" onClick={() => go("rules")}>Правила</button>
             <button className="nav-button" type="button" onClick={() => go("review")}>Повторение</button>
             <button className="nav-button" type="button" onClick={handleReset}>Сброс</button>
           </nav>
@@ -226,12 +227,12 @@ export function LearningApp() {
                   Для завершения темы нужны все карточки и результат квиза не ниже {uiStrings.passPercent}%.
                 </p>
                 <ContentStatusNote status={activeTheme.status} />
+                {activeTheme.learningNote && (
+                  <button className="secondary-button mt-5" type="button" onClick={() => go("rules", { themeId: activeTheme.id })}>
+                    Правила грамматики
+                  </button>
+                )}
               </Panel>
-              {activeTheme.learningNote && (
-                <Panel title="Короткая заметка">
-                  <p className="text-stone-600">{activeTheme.learningNote}</p>
-                </Panel>
-              )}
             </section>
           </>
         )}
@@ -276,6 +277,8 @@ export function LearningApp() {
         )}
 
         {appState.screen === "review" && <ReviewScreen progress={progress} go={go} />}
+
+        {appState.screen === "rules" && <RulesScreen go={go} />}
       </main>
     </div>
   );
@@ -542,5 +545,29 @@ function ReviewCard({
         {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
       </small>
     </article>
+  );
+}
+
+function RulesScreen({ go }: { go: (screen: Screen, patch?: Partial<AppState>) => void }) {
+  const ruleThemes = themes.filter((theme) => theme.learningNote);
+
+  return (
+    <>
+      <SectionHead eyebrow="A0 -> A1" title="Правила грамматики">
+        Короткие объяснения вынесены отдельно, чтобы они не мешали проходить карточки.
+      </SectionHead>
+      <section className="grid gap-4 md:grid-cols-2">
+        {ruleThemes.map((theme) => (
+          <article className="panel-card p-6" key={theme.id}>
+            <span className="eyebrow">Тема {theme.order}</span>
+            <h2 className="mt-2 text-2xl font-black text-[#2f4f4f]">{theme.title}</h2>
+            <p className="mt-4 font-semibold leading-7 text-stone-700">{theme.learningNote}</p>
+            <button className="secondary-button mt-6" type="button" onClick={() => go("theme", { themeId: theme.id })}>
+              К теме
+            </button>
+          </article>
+        ))}
+      </section>
+    </>
   );
 }
