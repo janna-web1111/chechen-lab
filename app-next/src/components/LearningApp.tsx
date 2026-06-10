@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { themes, uiStrings } from "@/data/content";
 import { buildQuiz } from "@/lib/quiz";
 import { createEmptyProgress, readProgress, resetProgress, writeProgress } from "@/lib/progress";
@@ -8,13 +8,16 @@ import type { StudyCard, Theme, VerificationStatus } from "@/types/content";
 import type { UserProgress } from "@/types/progress";
 import { ProgressBar } from "@/components/ProgressBar";
 
-type Screen = "home" | "path" | "theme" | "cards" | "quiz" | "result" | "review";
+type Screen = "home" | "path" | "theme" | "cards" | "quiz" | "result" | "review" | "rules";
 
 type AppState = {
   screen: Screen;
   themeId: string | null;
   cardIndex: number;
   quizIndex: number;
+  quizSeed: string | null;
+  quizStartedAt: number | null;
+  quizDurationSeconds: number | null;
   quizAnswers: string[];
   selectedAnswer: string | null;
 };
@@ -24,9 +27,28 @@ const initialState: AppState = {
   themeId: null,
   cardIndex: 0,
   quizIndex: 0,
+  quizSeed: null,
+  quizStartedAt: null,
+  quizDurationSeconds: null,
   quizAnswers: [],
   selectedAnswer: null,
 };
+
+function createQuizSeed(themeId: string) {
+  return `${themeId}-${Date.now()}-${Math.random()}`;
+}
+
+function formatDuration(totalSeconds: number) {
+  const safeSeconds = Math.max(0, Math.round(totalSeconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  if (minutes === 0) return `${seconds} сек.`;
+
+  return `${minutes} мин. ${seconds.toString().padStart(2, "0")} сек.`;
+}
+
+const themeIcons = ["🌱", "👋", "🏠", "🍞", "🔢"];
 
 export function LearningApp() {
   const [appState, setAppState] = useState<AppState>(initialState);
@@ -56,7 +78,7 @@ export function LearningApp() {
     updateProgress({ ...progress, studiedCards: [...progress.studiedCards, cardId] });
   }
 
-  function completeTheme(theme: Theme, score: number) {
+  function completeTheme(theme: Theme, score: number, durationSeconds: number) {
     if (!progress) return;
     const allCardsStudied = theme.cards.every((card) => progress.studiedCards.includes(card.id));
     const shouldCompleteTheme = score >= uiStrings.passPercent && allCardsStudied;
@@ -68,7 +90,7 @@ export function LearningApp() {
         : progress.completedThemes,
       quizResults: {
         ...progress.quizResults,
-        [theme.id]: { score, completedAt: new Date().toISOString() },
+        [theme.id]: { score, completedAt: new Date().toISOString(), durationSeconds },
       },
     });
   }
@@ -88,20 +110,58 @@ export function LearningApp() {
     : progress.quizResults[activeTheme.id]
       ? `Последний квиз: ${progress.quizResults[activeTheme.id].score}%`
       : "Квиз еще не пройден.";
+  const quizDuration = appState.quizDurationSeconds ?? progress.quizResults[activeTheme.id]?.durationSeconds;
+
+  function startQuiz(themeId: string) {
+    go("quiz", {
+      themeId,
+      quizIndex: 0,
+      quizSeed: createQuizSeed(themeId),
+      quizStartedAt: Date.now(),
+      quizDurationSeconds: null,
+      quizAnswers: [],
+      selectedAnswer: null,
+    });
+  }
+
+  function goBack() {
+    if (appState.screen === "path") {
+      go("home");
+      return;
+    }
+
+    if (appState.screen === "theme") {
+      go("path");
+      return;
+    }
+
+    if (appState.screen === "cards" || appState.screen === "quiz" || appState.screen === "result") {
+      go("theme", { themeId: activeTheme.id });
+      return;
+    }
+
+    if (appState.screen === "rules" && appState.themeId) {
+      go("theme", { themeId: appState.themeId });
+      return;
+    }
+
+    go("home");
+  }
 
   return (
-    <div className="min-h-screen bg-background text-stone-950">
-      <header className="sticky top-0 z-10 border-b border-emerald-950/10 bg-background/90 px-4 py-3 backdrop-blur">
+    <div className="app-shell min-h-screen">
+      <header className="site-header sticky top-0 z-10 px-4 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <button className="flex items-center gap-3 text-left" type="button" onClick={() => go("home")}>
-            <span className="grid size-11 place-items-center rounded-lg bg-emerald-900 text-sm font-black text-white shadow-sm">CL</span>
+            <span className="brand-badge grid size-12 place-items-center text-sm font-black">CL</span>
             <span>
-              <span className="block font-black">{uiStrings.appName}</span>
-              <span className="block text-sm font-semibold text-stone-600">{uiStrings.levelLabel}</span>
+              <span className="block text-lg font-black">{uiStrings.appName}</span>
+              <span className="block text-sm font-semibold text-white/85">{uiStrings.levelLabel}</span>
             </span>
           </button>
           <nav className="flex flex-wrap gap-2">
             <button className="nav-button" type="button" onClick={() => go("path")}>Путь</button>
+            <button className="nav-button" type="button" onClick={() => go("rules")}>Правила</button>
             <button className="nav-button" type="button" onClick={() => go("review")}>Повторение</button>
             <button className="nav-button" type="button" onClick={handleReset}>Сброс</button>
           </nav>
@@ -109,27 +169,35 @@ export function LearningApp() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
+        {appState.screen !== "home" && (
+          <div className="mb-5">
+            <button className="secondary-button compact-button" type="button" onClick={goBack}>
+              &lt; Назад
+            </button>
+          </div>
+        )}
+
         {appState.screen === "home" && (
-          <section className="grid min-h-[calc(100vh-9rem)] gap-6 md:grid-cols-[1fr_320px]">
-            <div className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-white to-emerald-50 p-8 shadow-sm md:p-14">
+          <section className="grid gap-5 md:grid-cols-[1fr_300px]">
+            <div className="hero-panel flex flex-col justify-center p-6 md:p-10">
               <p className="eyebrow">{uiStrings.levelLabel}</p>
-              <h1 className="max-w-3xl text-5xl font-black leading-none tracking-normal md:text-7xl">
+              <h1 className="max-w-2xl text-4xl font-black leading-tight tracking-normal text-[#2f4f4f] md:text-5xl">
                 Первый путь изучения чеченского
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
+              <p className="mt-4 max-w-2xl text-base font-semibold leading-7 text-stone-700">
                 Короткие темы, карточки, квиз и локальный прогресс без регистрации.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap gap-3">
                 <button className="primary-button" type="button" onClick={() => go("path")}>Начать обучение</button>
                 <button className="secondary-button" type="button" onClick={() => go("review")}>Повторить слова</button>
               </div>
             </div>
-            <aside className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
+            <aside className="progress-card flex flex-col justify-center p-5">
               <span className="text-sm font-bold text-stone-600">Общий прогресс</span>
-              <strong className="my-3 text-5xl font-black">{overallProgress}%</strong>
+              <strong className="my-3 text-4xl font-black text-[#2f4f4f]">{overallProgress}%</strong>
               <ProgressBar value={overallProgress} />
               <p className="mt-4 text-stone-600">{progress.completedThemes.length} из {themes.length} тем завершено</p>
-              <div className="mt-6 rounded-lg bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+              <div className="soft-pill mt-6 p-4 text-sm font-semibold">
                 5 тем, карточки, квиз и повторение без регистрации.
               </div>
             </aside>
@@ -141,38 +209,39 @@ export function LearningApp() {
             <SectionHead eyebrow={uiStrings.levelLabel} title="Путь обучения">
               Начните с первой незавершенной темы или вернитесь к уже открытой.
             </SectionHead>
-            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <section className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-5">
               {themes.map((theme) => {
                 const studiedCount = theme.cards.filter((card) => progress.studiedCards.includes(card.id)).length;
                 const isCompleted = progress.completedThemes.includes(theme.id);
                 const isCurrent = !isCompleted && studiedCount === 0 && theme.order === 1;
                 const status = isCompleted ? "Завершена" : studiedCount > 0 ? `В процессе: ${studiedCount}/${theme.cards.length}` : "Не начата";
+                const icon = themeIcons[theme.order - 1] ?? "⭐";
 
                 return (
                   <article
-                    className={`flex min-h-64 flex-col justify-between rounded-lg border bg-white p-5 shadow-sm transition ${
-                      isCurrent ? "border-emerald-700 ring-2 ring-emerald-100" : "border-emerald-950/10 hover:border-emerald-700/40"
+                    className={`topic-card flex min-h-44 flex-col justify-between p-3 ${
+                      isCurrent ? "topic-card-current" : ""
                     }`}
                     key={theme.id}
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="grid size-8 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-emerald-900">{theme.order}</span>
+                        <span className="theme-number grid size-8 place-items-center text-sm font-black">{icon}</span>
                         {isCurrent && (
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-800">
+                          <span className="soft-pill px-2 py-1 text-[11px] font-black">
                             Начните здесь
                           </span>
                         )}
                       </div>
-                      <h2 className="mt-2 text-xl font-black">{theme.title}</h2>
-                      <p className="mt-3 leading-6 text-stone-600">{theme.description}</p>
+                      <h2 className="mt-2 text-base font-black text-[#2f4f4f]">{theme.title}</h2>
+                      <p className="mt-1.5 text-xs leading-4 text-stone-600">{theme.description}</p>
                     </div>
-                    <div className="mt-4 grid gap-3">
-                      <div className="flex justify-between gap-2 rounded-lg bg-slate-50 p-3 text-sm font-semibold text-stone-600">
+                    <div className="mt-2.5 grid gap-2">
+                      <div className="soft-pill flex justify-between gap-2 p-2 text-[11px] font-semibold">
                         <span>{theme.cards.length} карточек</span>
                         <span>{status}</span>
                       </div>
-                      <button className="secondary-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>
+                      <button className="secondary-button compact-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>
                         Открыть
                       </button>
                     </div>
@@ -205,7 +274,7 @@ export function LearningApp() {
                     disabled={!activeThemeCardsStudied}
                     title={activeThemeCardsStudied ? undefined : "Сначала пройдите карточки темы"}
                     type="button"
-                    onClick={() => go("quiz", { themeId: activeTheme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })}
+                    onClick={() => startQuiz(activeTheme.id)}
                   >
                     Квиз
                   </button>
@@ -217,12 +286,12 @@ export function LearningApp() {
                   Для завершения темы нужны все карточки и результат квиза не ниже {uiStrings.passPercent}%.
                 </p>
                 <ContentStatusNote status={activeTheme.status} />
+                {activeTheme.learningNote && (
+                  <button className="secondary-button mt-5" type="button" onClick={() => go("rules", { themeId: activeTheme.id })}>
+                    Правила грамматики
+                  </button>
+                )}
               </Panel>
-              {activeTheme.learningNote && (
-                <Panel title="Короткая заметка">
-                  <p className="text-stone-600">{activeTheme.learningNote}</p>
-                </Panel>
-              )}
             </section>
           </>
         )}
@@ -233,6 +302,7 @@ export function LearningApp() {
             cardIndex={appState.cardIndex}
             markCardStudied={markCardStudied}
             go={go}
+            startQuiz={startQuiz}
           />
         )}
 
@@ -247,10 +317,15 @@ export function LearningApp() {
         )}
 
         {appState.screen === "result" && (
-          <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
+          <section className="result-card mx-auto max-w-3xl p-8 text-center">
             <p className="eyebrow">{activeTheme.title}</p>
-            <h1 className="text-7xl font-black text-emerald-900">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
-            <p className="mt-4 text-stone-600">
+            <h1 className="text-7xl font-black text-[#2f4f4f]">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
+            {typeof quizDuration === "number" && (
+              <p className="soft-pill mx-auto mt-4 max-w-sm p-3 text-lg font-black">
+                Время квиза: {formatDuration(quizDuration)}
+              </p>
+            )}
+            <p className="mt-4 font-semibold text-stone-600">
               {activeThemeCompleted
                 ? "Тема завершена. Можно идти дальше."
                 : (progress.quizResults[activeTheme.id]?.score ?? 0) >= uiStrings.passPercent
@@ -267,6 +342,8 @@ export function LearningApp() {
         )}
 
         {appState.screen === "review" && <ReviewScreen progress={progress} go={go} />}
+
+        {appState.screen === "rules" && <RulesScreen go={go} />}
       </main>
     </div>
   );
@@ -276,16 +353,16 @@ function SectionHead({ eyebrow, title, children }: { eyebrow: string; title: str
   return (
     <section className="mb-6">
       <p className="eyebrow">{eyebrow}</p>
-      <h1 className="text-4xl font-black tracking-normal md:text-5xl">{title}</h1>
-      <p className="mt-3 max-w-2xl leading-7 text-stone-600">{children}</p>
+      <h1 className="text-4xl font-black tracking-normal text-[#2f4f4f] md:text-5xl">{title}</h1>
+      <p className="mt-3 max-w-2xl font-semibold leading-7 text-stone-600">{children}</p>
     </section>
   );
 }
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-black">{title}</h2>
+    <section className="panel-card p-6">
+      <h2 className="text-xl font-black text-[#2f4f4f]">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -348,11 +425,13 @@ function CardsScreen({
   cardIndex,
   markCardStudied,
   go,
+  startQuiz,
 }: {
   theme: Theme;
   cardIndex: number;
   markCardStudied: (cardId: string) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
+  startQuiz: (themeId: string) => void;
 }) {
   const card = theme.cards[cardIndex];
   const badge = verificationBadge(card.verificationStatus);
@@ -362,17 +441,17 @@ function CardsScreen({
   }, [card.id, markCardStudied]);
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
+    <section className="study-shell mx-auto max-w-3xl p-6 md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Карточка {cardIndex + 1} из {theme.cards.length}</span>
         <span>{theme.title}</span>
       </div>
-      <div className="grid min-h-80 place-items-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
+      <div className="study-face grid min-h-80 place-items-center p-6 text-center">
         <span className={`justify-self-end rounded-full border px-3 py-1 text-sm font-black ${badge.className}`}>
           {badge.text}
         </span>
-        <strong className="text-6xl font-black leading-none text-emerald-950 md:text-7xl">{card.ce}</strong>
-        <p className="mt-4 text-2xl font-black">{card.ru}</p>
+        <strong className="text-6xl font-black leading-none text-[#2f4f4f] md:text-7xl">{card.ce}</strong>
+        <p className="mt-4 text-2xl font-black text-[#ff7f50]">{card.ru}</p>
         <small className="text-stone-600">
           {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
         </small>
@@ -386,7 +465,7 @@ function CardsScreen({
           type="button"
           onClick={() =>
             cardIndex === theme.cards.length - 1
-              ? go("quiz", { themeId: theme.id, quizIndex: 0, quizAnswers: [], selectedAnswer: null })
+              ? startQuiz(theme.id)
               : go("cards", { cardIndex: cardIndex + 1 })
           }
         >
@@ -407,12 +486,15 @@ function QuizScreen({
   theme: Theme;
   state: AppState;
   setState: React.Dispatch<React.SetStateAction<AppState>>;
-  completeTheme: (theme: Theme, score: number) => void;
+  completeTheme: (theme: Theme, score: number, durationSeconds: number) => void;
   go: (screen: Screen, patch?: Partial<AppState>) => void;
 }) {
-  const quiz = buildQuiz(theme);
+  const [now, setNow] = useState(state.quizStartedAt ?? 0);
+  const quiz = useMemo(() => buildQuiz(theme, state.quizSeed ?? "default"), [state.quizSeed, theme]);
   const question = quiz[state.quizIndex];
   const answered = Boolean(state.selectedAnswer);
+  const startedAt = state.quizStartedAt ?? now;
+  const elapsedSeconds = Math.max(0, Math.floor((now - startedAt) / 1000));
 
   function chooseAnswer(cardId: string) {
     setState((current) => {
@@ -422,33 +504,53 @@ function QuizScreen({
     });
   }
 
-  function nextQuestion() {
+  const nextQuestion = useCallback(() => {
     if (state.quizIndex === quiz.length - 1) {
       const correctCount = quiz.filter((item, index) => state.quizAnswers[index] === item.correctCardId).length;
-      completeTheme(theme, Math.round((correctCount / quiz.length) * 100));
-      go("result");
+      const durationSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+      completeTheme(theme, Math.round((correctCount / quiz.length) * 100), durationSeconds);
+      go("result", { quizDurationSeconds: durationSeconds });
       return;
     }
 
     go("quiz", { quizIndex: state.quizIndex + 1, selectedAnswer: null });
-  }
+  }, [completeTheme, go, quiz, startedAt, state.quizAnswers, state.quizIndex, theme]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!answered) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      nextQuestion();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [answered, nextQuestion]);
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
+    <section className="quiz-shell mx-auto max-w-3xl p-6 text-center md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Вопрос {state.quizIndex + 1} из {quiz.length}</span>
+        <span>Время: {formatDuration(elapsedSeconds)}</span>
         <span>{theme.title}</span>
       </div>
-      <h1 className="text-3xl font-black">{question.prompt}</h1>
+      <h1 className="text-3xl font-black text-[#2f4f4f]">{question.prompt}</h1>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {question.options.map((option) => {
           const isSelected = state.selectedAnswer === option.cardId;
           const isCorrect = answered && option.cardId === question.correctCardId;
-          const stateClass = isCorrect ? "border-emerald-700 bg-emerald-50" : isSelected ? "border-red-700 bg-red-50" : "";
+          const stateClass = isCorrect ? "border-[#2f4f4f] bg-[#2f4f4f] text-white shadow-none" : isSelected ? "border-red-700 bg-red-50 shadow-none" : "bg-[#f5f5dc]";
 
           return (
             <button
-              className={`min-h-16 rounded-lg border border-emerald-950/10 bg-white px-4 text-left font-bold transition hover:border-emerald-700/50 ${stateClass}`}
+              className={`quiz-option min-h-16 px-4 text-left text-lg font-bold transition ${stateClass}`}
               disabled={answered}
               key={option.id}
               type="button"
@@ -459,7 +561,7 @@ function QuizScreen({
           );
         })}
       </div>
-      {answered && <p className="mt-5 rounded-lg bg-emerald-50 p-4 font-semibold text-emerald-950">{question.explanation}</p>}
+      {answered && <p className="soft-pill mt-5 p-4 text-lg font-bold">{question.explanation}</p>}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
         <button className="secondary-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>В тему</button>
         <button className="primary-button" type="button" disabled={!answered} onClick={nextQuestion}>
@@ -479,8 +581,8 @@ function ReviewScreen({ progress, go }: { progress: UserProgress; go: (screen: S
 
   if (!studiedCards.length) {
     return (
-      <section className="mx-auto max-w-2xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-4xl font-black">Пока нечего повторять</h1>
+      <section className="empty-card mx-auto max-w-2xl p-8 text-center">
+        <h1 className="text-4xl font-black text-[#2f4f4f]">Пока нечего повторять</h1>
         <p className="mt-4 text-stone-600">Пройдите карточки первой темы, и они появятся здесь.</p>
         <button className="primary-button mt-6" type="button" onClick={() => go("path")}>К пути</button>
       </section>
@@ -509,16 +611,40 @@ function ReviewCard({
   const badge = verificationBadge(card.verificationStatus);
 
   return (
-    <article className="min-h-40 rounded-lg border border-emerald-950/10 bg-white p-5 shadow-sm">
+    <article className="review-card min-h-40 p-5">
       <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
       <span className={`mt-3 inline-flex rounded-full border px-2.5 py-1 text-xs font-black ${badge.className}`}>
         {badge.text}
       </span>
-      <strong className="mt-4 block text-4xl font-black">{card.ce}</strong>
-      <p className="mt-2 font-bold">{card.ru}</p>
+      <strong className="mt-4 block text-4xl font-black text-[#2f4f4f]">{card.ce}</strong>
+      <p className="mt-2 font-bold text-[#ff7f50]">{card.ru}</p>
       <small className="text-stone-600">
         {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
       </small>
     </article>
+  );
+}
+
+function RulesScreen({ go }: { go: (screen: Screen, patch?: Partial<AppState>) => void }) {
+  const ruleThemes = themes.filter((theme) => theme.learningNote);
+
+  return (
+    <>
+      <SectionHead eyebrow="A0 -> A1" title="Правила грамматики">
+        Короткие объяснения вынесены отдельно, чтобы они не мешали проходить карточки.
+      </SectionHead>
+      <section className="grid gap-4 md:grid-cols-2">
+        {ruleThemes.map((theme) => (
+          <article className="panel-card p-6" key={theme.id}>
+            <span className="eyebrow">Тема {theme.order}</span>
+            <h2 className="mt-2 text-2xl font-black text-[#2f4f4f]">{theme.title}</h2>
+            <p className="mt-4 font-semibold leading-7 text-stone-700">{theme.learningNote}</p>
+            <button className="secondary-button mt-6" type="button" onClick={() => go("theme", { themeId: theme.id })}>
+              К теме
+            </button>
+          </article>
+        ))}
+      </section>
+    </>
   );
 }

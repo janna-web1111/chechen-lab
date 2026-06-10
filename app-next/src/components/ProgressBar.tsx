@@ -6,8 +6,8 @@ export function ProgressBar({ value }: ProgressBarProps) {
   const normalized = Math.max(0, Math.min(100, value));
 
   return (
-    <div className="h-2.5 overflow-hidden rounded-full bg-emerald-950/10">
-      <div className="h-full rounded-full bg-emerald-700 shadow-sm" style={{ width: `${normalized}%` }} />
+    <div className="h-3 overflow-hidden rounded-full border-2 border-[#2f4f4f] bg-white">
+      <div className="h-full rounded-full bg-[#ffd700]" style={{ width: `${normalized}%` }} />
     </div>
   );
 }

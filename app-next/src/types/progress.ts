@@ -1,6 +1,7 @@
 export type QuizResult = {
   score: number;
   completedAt: string;
+  durationSeconds?: number;
 };
 
 export type UserProgress = {
