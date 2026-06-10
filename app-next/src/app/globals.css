@@ -1,8 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #eef4f0;
-  --foreground: #16231f;
+  --background: #f5f5dc;
+  --foreground: #333333;
+  --color-pink: #ffc0cb;
+  --color-dark-green: #2f4f4f;
+  --color-light-gray: #d3d3d3;
+  --color-coral: #ff7f50;
+  --color-beige: #f5f5dc;
+  --color-yellow: #ffd700;
+  --shadow-soft: 0 8px 24px rgb(0 0 0 / 10%);
+  --shadow-hover: 0 14px 36px rgb(0 0 0 / 15%);
+  --radius-play: 20px;
+  --radius-play-sm: 14px;
 }
 
 @theme inline {
@@ -13,9 +24,12 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image: radial-gradient(rgb(255 215 0 / 42%) 5%, transparent 10%);
+  background-position: 0 0, 20px 20px;
+  background-size: 40px 40px;
   color: var(--foreground);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Fredoka", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 button {
@@ -28,46 +42,60 @@ button:disabled {
 }
 
 .eyebrow {
-  color: #1f6f5b;
+  color: var(--color-coral);
   font-size: 0.82rem;
-  font-weight: 850;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .primary-button {
-  min-height: 44px;
-  border-radius: 0.5rem;
-  background: #1f6f5b;
-  padding: 0 1.1rem;
+  min-height: 48px;
+  border: 2px solid var(--color-dark-green);
+  border-radius: var(--radius-play);
+  background: var(--color-coral);
+  padding: 0 1.35rem;
   color: white;
-  font-weight: 800;
-  box-shadow: 0 10px 18px -14px #123c33;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--color-dark-green);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .primary-button:hover {
-  background: #174f42;
-  transform: translateY(-1px);
+  background: #ff6f3d;
+  box-shadow: 0 6px 0 var(--color-dark-green);
+  transform: translateY(-2px);
+}
+
+.primary-button:active {
+  box-shadow: 0 0 0 var(--color-dark-green);
+  transform: translateY(4px);
 }
 
 .secondary-button,
 .nav-button {
-  min-height: 44px;
-  border: 1px solid #d6d3ca;
-  border-radius: 0.5rem;
-  background: white;
-  padding: 0 1.1rem;
-  color: #1c2522;
-  font-weight: 800;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  min-height: 48px;
+  border: 2px solid var(--color-dark-green);
+  border-radius: var(--radius-play);
+  background: var(--color-yellow);
+  padding: 0 1.25rem;
+  color: var(--foreground);
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--color-dark-green);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .secondary-button:hover,
 .nav-button:hover {
-  background: #f6faf7;
-  border-color: #1f6f5b;
-  transform: translateY(-1px);
+  background: #ffe45c;
+  box-shadow: 0 6px 0 var(--color-dark-green);
+  transform: translateY(-2px);
+}
+
+.secondary-button:active,
+.nav-button:active {
+  box-shadow: 0 0 0 var(--color-dark-green);
+  transform: translateY(4px);
 }
 
 .primary-button:focus-visible,
@@ -76,4 +104,112 @@ button:disabled {
 button:focus-visible {
   outline: 3px solid #2458a7;
   outline-offset: 2px;
+}
+
+.app-shell {
+  color: var(--foreground);
+}
+
+.site-header {
+  background: linear-gradient(135deg, var(--color-pink), var(--color-coral));
+  border-bottom-left-radius: 36px;
+  border-bottom-right-radius: 36px;
+  box-shadow: var(--shadow-soft);
+  color: white;
+}
+
+.brand-badge {
+  background: var(--color-dark-green);
+  border: 3px solid rgb(255 255 255 / 50%);
+  border-radius: 18px;
+  box-shadow: 0 4px 0 rgb(0 0 0 / 18%);
+  color: white;
+}
+
+.hero-panel,
+.progress-card,
+.panel-card,
+.study-shell,
+.quiz-shell,
+.result-card,
+.empty-card {
+  background: white;
+  border: 3px solid rgb(255 255 255 / 80%);
+  border-radius: var(--radius-play);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-panel {
+  background: linear-gradient(135deg, white, rgb(255 192 203 / 42%));
+  border-color: var(--color-pink);
+}
+
+.topic-card,
+.review-card {
+  background: white;
+  border: 3px solid transparent;
+  border-left: 6px solid var(--color-coral);
+  border-radius: var(--radius-play);
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.topic-card:nth-child(2) {
+  border-left-color: var(--color-yellow);
+}
+
+.topic-card:nth-child(3) {
+  border-left-color: var(--color-dark-green);
+}
+
+.topic-card:nth-child(4) {
+  border-left-color: var(--color-pink);
+}
+
+.topic-card:nth-child(5) {
+  border-left-color: #8fbc8f;
+}
+
+.topic-card:hover {
+  border-color: var(--color-yellow);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-6px) scale(1.02);
+}
+
+.topic-card-current {
+  border-color: var(--color-yellow);
+  box-shadow: 0 10px 28px rgb(255 127 80 / 20%);
+}
+
+.theme-number {
+  background: var(--color-yellow);
+  border: 2px solid var(--color-dark-green);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--color-dark-green);
+  color: var(--color-dark-green);
+}
+
+.soft-pill {
+  background: rgb(255 192 203 / 42%);
+  border-radius: var(--radius-play-sm);
+  color: var(--color-dark-green);
+}
+
+.study-face {
+  background: linear-gradient(135deg, white, rgb(255 215 0 / 18%));
+  border: 4px solid var(--color-pink);
+  border-radius: var(--radius-play);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 70%);
+}
+
+.quiz-option {
+  border: 3px solid var(--color-light-gray);
+  border-radius: var(--radius-play-sm);
+  box-shadow: 0 3px 0 var(--color-light-gray);
+}
+
+.quiz-option:hover:not(:disabled) {
+  background: var(--color-pink);
+  border-color: var(--color-coral);
+  transform: translateY(-2px);
 }

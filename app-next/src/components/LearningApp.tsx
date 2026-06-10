@@ -34,6 +34,8 @@ function createQuizSeed(themeId: string) {
   return `${themeId}-${Date.now()}-${Math.random()}`;
 }
 
+const themeIcons = ["🌱", "👋", "🏠", "🍞", "🔢"];
+
 export function LearningApp() {
   const [appState, setAppState] = useState<AppState>(initialState);
   const [progress, setProgress] = useState<UserProgress>(createEmptyProgress);
@@ -96,14 +98,14 @@ export function LearningApp() {
       : "Квиз еще не пройден.";
 
   return (
-    <div className="min-h-screen bg-background text-stone-950">
-      <header className="sticky top-0 z-10 border-b border-emerald-950/10 bg-background/90 px-4 py-3 backdrop-blur">
+    <div className="app-shell min-h-screen">
+      <header className="site-header sticky top-0 z-10 px-4 py-4">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <button className="flex items-center gap-3 text-left" type="button" onClick={() => go("home")}>
-            <span className="grid size-11 place-items-center rounded-lg bg-emerald-900 text-sm font-black text-white shadow-sm">CL</span>
+            <span className="brand-badge grid size-12 place-items-center text-sm font-black">CL</span>
             <span>
-              <span className="block font-black">{uiStrings.appName}</span>
-              <span className="block text-sm font-semibold text-stone-600">{uiStrings.levelLabel}</span>
+              <span className="block text-lg font-black">{uiStrings.appName}</span>
+              <span className="block text-sm font-semibold text-white/85">{uiStrings.levelLabel}</span>
             </span>
           </button>
           <nav className="flex flex-wrap gap-2">
@@ -117,12 +119,12 @@ export function LearningApp() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
         {appState.screen === "home" && (
           <section className="grid min-h-[calc(100vh-9rem)] gap-6 md:grid-cols-[1fr_320px]">
-            <div className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-white to-emerald-50 p-8 shadow-sm md:p-14">
+            <div className="hero-panel flex flex-col justify-center p-8 md:p-14">
               <p className="eyebrow">{uiStrings.levelLabel}</p>
-              <h1 className="max-w-3xl text-5xl font-black leading-none tracking-normal md:text-7xl">
+              <h1 className="max-w-3xl text-5xl font-black leading-none tracking-normal text-[#2f4f4f] md:text-7xl">
                 Первый путь изучения чеченского
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-600">
+              <p className="mt-5 max-w-2xl text-lg font-semibold leading-8 text-stone-700">
                 Короткие темы, карточки, квиз и локальный прогресс без регистрации.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -130,12 +132,12 @@ export function LearningApp() {
                 <button className="secondary-button" type="button" onClick={() => go("review")}>Повторить слова</button>
               </div>
             </div>
-            <aside className="flex flex-col justify-center rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
+            <aside className="progress-card flex flex-col justify-center p-6">
               <span className="text-sm font-bold text-stone-600">Общий прогресс</span>
-              <strong className="my-3 text-5xl font-black">{overallProgress}%</strong>
+              <strong className="my-3 text-5xl font-black text-[#2f4f4f]">{overallProgress}%</strong>
               <ProgressBar value={overallProgress} />
               <p className="mt-4 text-stone-600">{progress.completedThemes.length} из {themes.length} тем завершено</p>
-              <div className="mt-6 rounded-lg bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+              <div className="soft-pill mt-6 p-4 text-sm font-semibold">
                 5 тем, карточки, квиз и повторение без регистрации.
               </div>
             </aside>
@@ -153,28 +155,29 @@ export function LearningApp() {
                 const isCompleted = progress.completedThemes.includes(theme.id);
                 const isCurrent = !isCompleted && studiedCount === 0 && theme.order === 1;
                 const status = isCompleted ? "Завершена" : studiedCount > 0 ? `В процессе: ${studiedCount}/${theme.cards.length}` : "Не начата";
+                const icon = themeIcons[theme.order - 1] ?? "⭐";
 
                 return (
                   <article
-                    className={`flex min-h-64 flex-col justify-between rounded-lg border bg-white p-5 shadow-sm transition ${
-                      isCurrent ? "border-emerald-700 ring-2 ring-emerald-100" : "border-emerald-950/10 hover:border-emerald-700/40"
+                    className={`topic-card flex min-h-64 flex-col justify-between p-5 ${
+                      isCurrent ? "topic-card-current" : ""
                     }`}
                     key={theme.id}
                   >
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="grid size-8 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-emerald-900">{theme.order}</span>
+                        <span className="theme-number grid size-10 place-items-center text-lg font-black">{icon}</span>
                         {isCurrent && (
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-800">
+                          <span className="soft-pill px-2.5 py-1 text-xs font-black">
                             Начните здесь
                           </span>
                         )}
                       </div>
-                      <h2 className="mt-2 text-xl font-black">{theme.title}</h2>
+                      <h2 className="mt-3 text-xl font-black text-[#2f4f4f]">{theme.title}</h2>
                       <p className="mt-3 leading-6 text-stone-600">{theme.description}</p>
                     </div>
                     <div className="mt-4 grid gap-3">
-                      <div className="flex justify-between gap-2 rounded-lg bg-slate-50 p-3 text-sm font-semibold text-stone-600">
+                      <div className="soft-pill flex justify-between gap-2 p-3 text-sm font-semibold">
                         <span>{theme.cards.length} карточек</span>
                         <span>{status}</span>
                       </div>
@@ -253,10 +256,10 @@ export function LearningApp() {
         )}
 
         {appState.screen === "result" && (
-          <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
+          <section className="result-card mx-auto max-w-3xl p-8 text-center">
             <p className="eyebrow">{activeTheme.title}</p>
-            <h1 className="text-7xl font-black text-emerald-900">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
-            <p className="mt-4 text-stone-600">
+            <h1 className="text-7xl font-black text-[#2f4f4f]">{progress.quizResults[activeTheme.id]?.score ?? 0}%</h1>
+            <p className="mt-4 font-semibold text-stone-600">
               {activeThemeCompleted
                 ? "Тема завершена. Можно идти дальше."
                 : (progress.quizResults[activeTheme.id]?.score ?? 0) >= uiStrings.passPercent
@@ -282,16 +285,16 @@ function SectionHead({ eyebrow, title, children }: { eyebrow: string; title: str
   return (
     <section className="mb-6">
       <p className="eyebrow">{eyebrow}</p>
-      <h1 className="text-4xl font-black tracking-normal md:text-5xl">{title}</h1>
-      <p className="mt-3 max-w-2xl leading-7 text-stone-600">{children}</p>
+      <h1 className="text-4xl font-black tracking-normal text-[#2f4f4f] md:text-5xl">{title}</h1>
+      <p className="mt-3 max-w-2xl font-semibold leading-7 text-stone-600">{children}</p>
     </section>
   );
 }
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-black">{title}</h2>
+    <section className="panel-card p-6">
+      <h2 className="text-xl font-black text-[#2f4f4f]">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -368,17 +371,17 @@ function CardsScreen({
   }, [card.id, markCardStudied]);
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
+    <section className="study-shell mx-auto max-w-3xl p-6 md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Карточка {cardIndex + 1} из {theme.cards.length}</span>
         <span>{theme.title}</span>
       </div>
-      <div className="grid min-h-80 place-items-center rounded-lg border border-emerald-950/10 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
+      <div className="study-face grid min-h-80 place-items-center p-6 text-center">
         <span className={`justify-self-end rounded-full border px-3 py-1 text-sm font-black ${badge.className}`}>
           {badge.text}
         </span>
-        <strong className="text-6xl font-black leading-none text-emerald-950 md:text-7xl">{card.ce}</strong>
-        <p className="mt-4 text-2xl font-black">{card.ru}</p>
+        <strong className="text-6xl font-black leading-none text-[#2f4f4f] md:text-7xl">{card.ce}</strong>
+        <p className="mt-4 text-2xl font-black text-[#ff7f50]">{card.ru}</p>
         <small className="text-stone-600">
           {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
         </small>
@@ -453,21 +456,21 @@ function QuizScreen({
   }, [answered, nextQuestion]);
 
   return (
-    <section className="mx-auto max-w-3xl rounded-lg border border-emerald-950/10 bg-white p-6 shadow-sm md:p-9">
+    <section className="quiz-shell mx-auto max-w-3xl p-6 text-center md:p-9">
       <div className="mb-6 flex justify-between gap-3 text-sm font-bold text-stone-600">
         <span>Вопрос {state.quizIndex + 1} из {quiz.length}</span>
         <span>{theme.title}</span>
       </div>
-      <h1 className="text-3xl font-black">{question.prompt}</h1>
+      <h1 className="text-3xl font-black text-[#2f4f4f]">{question.prompt}</h1>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {question.options.map((option) => {
           const isSelected = state.selectedAnswer === option.cardId;
           const isCorrect = answered && option.cardId === question.correctCardId;
-          const stateClass = isCorrect ? "border-emerald-700 bg-emerald-50" : isSelected ? "border-red-700 bg-red-50" : "";
+          const stateClass = isCorrect ? "border-[#2f4f4f] bg-[#2f4f4f] text-white shadow-none" : isSelected ? "border-red-700 bg-red-50 shadow-none" : "bg-[#f5f5dc]";
 
           return (
             <button
-              className={`min-h-16 rounded-lg border border-emerald-950/10 bg-white px-4 text-left font-bold transition hover:border-emerald-700/50 ${stateClass}`}
+              className={`quiz-option min-h-16 px-4 text-left text-lg font-bold transition ${stateClass}`}
               disabled={answered}
               key={option.id}
               type="button"
@@ -478,7 +481,7 @@ function QuizScreen({
           );
         })}
       </div>
-      {answered && <p className="mt-5 rounded-lg bg-emerald-50 p-4 font-semibold text-emerald-950">{question.explanation}</p>}
+      {answered && <p className="soft-pill mt-5 p-4 text-lg font-bold">{question.explanation}</p>}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
         <button className="secondary-button" type="button" onClick={() => go("theme", { themeId: theme.id })}>В тему</button>
         <button className="primary-button" type="button" disabled={!answered} onClick={nextQuestion}>
@@ -498,8 +501,8 @@ function ReviewScreen({ progress, go }: { progress: UserProgress; go: (screen: S
 
   if (!studiedCards.length) {
     return (
-      <section className="mx-auto max-w-2xl rounded-lg border border-emerald-950/10 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-4xl font-black">Пока нечего повторять</h1>
+      <section className="empty-card mx-auto max-w-2xl p-8 text-center">
+        <h1 className="text-4xl font-black text-[#2f4f4f]">Пока нечего повторять</h1>
         <p className="mt-4 text-stone-600">Пройдите карточки первой темы, и они появятся здесь.</p>
         <button className="primary-button mt-6" type="button" onClick={() => go("path")}>К пути</button>
       </section>
@@ -528,13 +531,13 @@ function ReviewCard({
   const badge = verificationBadge(card.verificationStatus);
 
   return (
-    <article className="min-h-40 rounded-lg border border-emerald-950/10 bg-white p-5 shadow-sm">
+    <article className="review-card min-h-40 p-5">
       <span className="text-sm font-bold text-stone-600">{card.themeTitle}</span>
       <span className={`mt-3 inline-flex rounded-full border px-2.5 py-1 text-xs font-black ${badge.className}`}>
         {badge.text}
       </span>
-      <strong className="mt-4 block text-4xl font-black">{card.ce}</strong>
-      <p className="mt-2 font-bold">{card.ru}</p>
+      <strong className="mt-4 block text-4xl font-black text-[#2f4f4f]">{card.ce}</strong>
+      <p className="mt-2 font-bold text-[#ff7f50]">{card.ru}</p>
       <small className="text-stone-600">
         {card.ce === "TBD" ? "Чеченское слово будет добавлено после проверки." : card.readingHint}
       </small>
